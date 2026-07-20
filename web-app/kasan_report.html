@@ -1,0 +1,667 @@
+<title>介護報酬加算 最適化提案ロジック設計書</title>
+<style>
+:root{
+  --paper:#F5F4EF; --ink:#1C2321; --ink-soft:#4B534F;
+  --accent:#1F6E5C; --accent-soft:#E3EEE9;
+  --gold:#B8863B; --gold-soft:#F4E9D6;
+  --danger:#A23B2E; --danger-soft:#F6E4E0;
+  --line:#DAD6C9;
+  --code-bg:#1B211F; --code-ink:#E7E4D8; --code-line:#333B37;
+  --font-display:"Hiragino Mincho ProN","Yu Mincho","YuMincho",serif;
+  --font-body:"Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",sans-serif;
+  --font-mono:"Cascadia Code","Consolas","BIZ UDGothic","MS Gothic",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#14181A; --ink:#E8E6DE; --ink-soft:#A9B0AA;
+    --accent:#4FA98F; --accent-soft:#1D2E29;
+    --gold:#D9A857; --gold-soft:#2E2618;
+    --danger:#D97462; --danger-soft:#34211D;
+    --line:#333B37; --code-bg:#0E1211; --code-ink:#DCD9CC; --code-line:#2A302C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14181A; --ink:#E8E6DE; --ink-soft:#A9B0AA;
+  --accent:#4FA98F; --accent-soft:#1D2E29;
+  --gold:#D9A857; --gold-soft:#2E2618;
+  --danger:#D97462; --danger-soft:#34211D;
+  --line:#333B37; --code-bg:#0E1211; --code-ink:#DCD9CC; --code-line:#2A302C;
+}
+:root[data-theme="light"]{
+  --paper:#F5F4EF; --ink:#1C2321; --ink-soft:#4B534F;
+  --accent:#1F6E5C; --accent-soft:#E3EEE9;
+  --gold:#B8863B; --gold-soft:#F4E9D6;
+  --danger:#A23B2E; --danger-soft:#F6E4E0;
+  --line:#DAD6C9; --code-bg:#1B211F; --code-ink:#E7E4D8; --code-line:#333B37;
+}
+*{box-sizing:border-box;}
+body{margin:0;}
+.page{
+  background:var(--paper); color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.85; font-size:16px;
+  padding:0 0 6rem;
+}
+.wrap{max-width:780px;margin:0 auto;padding:0 1.5rem;}
+.wide{max-width:1040px;margin:0 auto;padding:0 1.5rem;}
+
+/* header */
+.doc-head{border-bottom:1px solid var(--line); padding:3.5rem 0 2.2rem;}
+.eyebrow{
+  font-family:var(--font-body); font-size:.78rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); font-weight:600; margin:0 0 .9rem;
+}
+h1.title{
+  font-family:var(--font-display); font-weight:600; font-size:2.15rem;
+  line-height:1.5; margin:0 0 .6rem; text-wrap:balance; letter-spacing:.02em;
+}
+.subtitle{font-size:1.05rem; color:var(--ink-soft); margin:0 0 1.4rem; text-wrap:balance;}
+.meta-row{display:flex; flex-wrap:wrap; gap:1.6rem; font-size:.85rem; color:var(--ink-soft); font-variant-numeric:tabular-nums;}
+.meta-row b{color:var(--ink); font-weight:600;}
+
+/* callout */
+.callout{
+  border-left:3px solid var(--danger); background:var(--danger-soft);
+  padding:1rem 1.3rem; border-radius:2px; margin:1.8rem 0; font-size:.93rem;
+}
+.callout .lbl{font-weight:700; color:var(--danger); display:block; margin-bottom:.3rem; font-size:.8rem; letter-spacing:.04em;}
+.callout.gold{border-left-color:var(--gold); background:var(--gold-soft);}
+.callout.gold .lbl{color:var(--gold);}
+
+/* toc */
+.toc{margin:2rem 0 0; padding:0; list-style:none; display:grid; gap:.35rem; font-size:.92rem;}
+.toc a{color:var(--ink); text-decoration:none; border-bottom:1px solid transparent;}
+.toc a:hover, .toc a:focus-visible{border-bottom-color:var(--accent); color:var(--accent);}
+.toc .n{color:var(--ink-soft); font-variant-numeric:tabular-nums; margin-right:.6rem;}
+
+/* sections */
+section{padding:3rem 0;border-bottom:1px solid var(--line);}
+section:last-of-type{border-bottom:none;}
+.kicker{font-family:var(--font-body); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 .5rem; font-weight:600;}
+h2{font-family:var(--font-display); font-size:1.6rem; font-weight:600; margin:0 0 1.1rem; text-wrap:balance;}
+h3{font-family:var(--font-display); font-size:1.18rem; font-weight:600; margin:2.1rem 0 .8rem; text-wrap:balance;}
+p{margin:0 0 1rem; max-width:68ch;}
+ul, ol{margin:0 0 1.2rem; padding-left:1.4rem;}
+li{margin-bottom:.4rem; max-width:64ch;}
+strong{color:var(--ink); font-weight:700;}
+code.inline{
+  font-family:var(--font-mono); background:var(--accent-soft); color:var(--accent);
+  padding:.1rem .35rem; border-radius:3px; font-size:.86em;
+}
+
+/* pipeline */
+.pipeline{
+  display:flex; flex-wrap:wrap; gap:0; margin:1.6rem 0 2rem; overflow-x:auto;
+}
+.pipe-step{
+  flex:1 1 120px; min-width:120px; padding:.9rem .9rem 1rem; position:relative;
+  border-top:2px solid var(--accent);
+}
+.pipe-step + .pipe-step{margin-left:.6rem;}
+.pipe-step .num{font-family:var(--font-mono); font-size:.72rem; color:var(--accent); font-weight:700;}
+.pipe-step .lbl{font-weight:700; font-size:.9rem; margin-top:.3rem; display:block;}
+.pipe-step .desc{font-size:.78rem; color:var(--ink-soft); margin-top:.25rem; line-height:1.5;}
+
+/* tables */
+.table-scroll{overflow-x:auto; margin:1.2rem 0 1.8rem; border:1px solid var(--line); border-radius:4px;}
+table{border-collapse:collapse; width:100%; font-size:.86rem; min-width:640px;}
+th, td{padding:.65rem .85rem; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap;}
+th{background:var(--accent-soft); color:var(--accent); font-weight:700; font-size:.76rem; letter-spacing:.04em; text-transform:uppercase;}
+tbody tr:last-child td{border-bottom:none;}
+td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
+td.wrap-cell{white-space:normal; max-width:280px;}
+.pos{color:var(--accent); font-weight:700;}
+.neg{color:var(--danger); font-weight:700;}
+.rank{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:1.5rem;height:1.5rem;border-radius:50%;
+  background:var(--gold-soft); color:var(--gold); font-weight:700; font-size:.78rem;
+  font-variant-numeric:tabular-nums;
+}
+
+/* code */
+.code-panel{
+  background:var(--code-bg); color:var(--code-ink); border-radius:6px;
+  margin:1.2rem 0 1.8rem; overflow:hidden; border:1px solid var(--code-line);
+}
+.code-panel .code-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:.6rem 1rem; border-bottom:1px solid var(--code-line);
+  font-family:var(--font-mono); font-size:.74rem; letter-spacing:.03em; color:#9CA79E;
+}
+.code-panel pre{margin:0; padding:1.2rem 1.4rem; overflow-x:auto; font-size:.82rem; line-height:1.7;}
+.code-panel code{font-family:var(--font-mono); white-space:pre;}
+.cm{color:#7D8C82;} /* comment tone within code */
+
+footer.doc-foot{padding:2.5rem 0 0; font-size:.82rem; color:var(--ink-soft);}
+footer.doc-foot p{max-width:none;}
+
+@media (max-width:600px){
+  h1.title{font-size:1.6rem;}
+  .pipe-step + .pipe-step{margin-left:0;}
+  .pipeline{flex-direction:column;}
+  .pipe-step{border-top:none; border-left:2px solid var(--accent); padding-left:1rem;}
+}
+</style>
+
+<div class="page">
+  <div class="wrap">
+    <div class="doc-head">
+      <p class="eyebrow">設計書 &middot; v1.0</p>
+      <h1 class="title">介護報酬加算 最適化提案ロジック設計書</h1>
+      <p class="subtitle">施設の基本情報から、獲得可能な加算を費用対効果・獲得難易度の両面でランキングし、ロードマップ化するアルゴリズム仕様</p>
+      <div class="meta-row">
+        <span><b>対象改定基準</b>&ensp;令和6年度(2024年度)介護報酬改定</span>
+        <span><b>作成日</b>&ensp;2026-07-19</span>
+        <span><b>参照実装</b>&ensp;kasan_engine.py (Python)</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="lbl">前提条件・要確認事項</span>
+      本書内の単位数・人件費・システム費用は<strong>設計ロジックを示すための代表値</strong>であり、そのまま経営判断に用いないこと。実運用では、厚生労働省の告示・通知および都道府県の最新単価表で各数値を検証したうえでマスタデータ(§1.3)を差し替えること。処遇改善加算など毎年運用が見直される加算は特に注意。
+    </div>
+
+    <ul class="toc">
+      <li><span class="n">0</span><a href="#sec0">設計方針・全体アーキテクチャ</a></li>
+      <li><span class="n">1</span><a href="#sec1">データモデル</a></li>
+      <li><span class="n">2</span><a href="#sec2">コアアルゴリズム(STEP0〜STEP6)</a></li>
+      <li><span class="n">3</span><a href="#sec3">出力フォーマットと計算例</a></li>
+      <li><span class="n">4</span><a href="#sec4">参照実装(Python)</a></li>
+      <li><span class="n">5</span><a href="#sec5">運用上の注意</a></li>
+    </ul>
+  </div>
+
+  <section id="sec0">
+    <div class="wrap">
+      <p class="kicker">0</p>
+      <h2>設計方針・全体アーキテクチャ</h2>
+      <p>加算の単位数・算定要件は3年ごとの報酬改定(直近は令和6年度改定)と毎年の処遇改善加算見直しで変動する。したがって本設計では<strong>「加算マスタ」をロジックから完全分離</strong>し、マスタ(JSON/DB)だけ更新すればコード変更なしに追随できる構造とする。</p>
+      <p>処理の流れは、業務形態によるフィルタリングを起点に、現状の人員・利用者構成と各加算要件の差分(ギャップ)を測定し、そのギャップから収益・コスト・難易度を導出する一本のパイプラインとして設計する。</p>
+      <div class="pipeline">
+        <div class="pipe-step"><span class="num">STEP 0</span><span class="lbl">形態フィルタ</span><span class="desc">業務形態に存在しない加算を除外</span></div>
+        <div class="pipe-step"><span class="num">STEP 1</span><span class="lbl">ギャップ分析</span><span class="desc">人員・書類・システム要件との差分測定</span></div>
+        <div class="pipe-step"><span class="num">STEP 2</span><span class="lbl">収益試算</span><span class="desc">年間請求増加額を算出</span></div>
+        <div class="pipe-step"><span class="num">STEP 3</span><span class="lbl">コスト試算</span><span class="desc">初期・ランニングコストを算出</span></div>
+        <div class="pipe-step"><span class="num">STEP 4</span><span class="lbl">費用対効果</span><span class="desc">年間純利益で順位付け</span></div>
+        <div class="pipe-step"><span class="num">STEP 5</span><span class="lbl">難易度評価</span><span class="desc">ギャップの重み付き合成</span></div>
+        <div class="pipe-step"><span class="num">STEP 6</span><span class="lbl">ロードマップ</span><span class="desc">要件クリアの手順を生成</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec1">
+    <div class="wrap">
+      <p class="kicker">1</p>
+      <h2>データモデル</h2>
+      <h3>1.1 入力スキーマ(FacilityInput)</h3>
+      <p>ユーザーが入力する基本情報は5系統に分解する。<code class="inline">service_type</code>(業務形態)、<code class="inline">staff</code>(人員配置)、<code class="inline">users</code>(利用者構成)、<code class="inline">current_addons / near_miss_addons</code>(取得状況)、<code class="inline">care_software</code>(利用中システム)、<code class="inline">region_class</code>(地域区分=単価に影響)。</p>
+
+      <h3>1.2 加算マスタスキーマ(AddonMaster)</h3>
+      <p>各加算は「単位数」「算定基準(月1回/回ごと/日ごと)」「必要人員」「必要な運用プロセス」「LIFE提出要否」「新規雇用が必要な職種とその人件費目安」「初期システム投資目安」を持つレコードとして定義する。これにより、加算ごとに個別ロジックを書かずに共通アルゴリズムで処理できる。</p>
+
+      <h3>1.3 加算マスタ サンプルデータ(代表12件)</h3>
+      <p>全加算(100件超)を網羅したものではなく、主要サービス類型の代表例。実運用時は同スキーマで全加算を登録する。</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>加算名</th><th>対象サービス</th><th class="num">単位数</th><th>算定基準</th><th class="wrap-cell">主要要件</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>科学的介護推進体制加算(I)</td><td>通所・訪問看護・施設系 等</td><td class="num">40</td><td>月1回</td><td class="wrap-cell">LIFEへのデータ提出、PDCAでのケア計画見直し</td></tr>
+            <tr><td>個別機能訓練加算(I)ロ</td><td>通所介護</td><td class="num">56</td><td>1回ごと</td><td class="wrap-cell">機能訓練指導員(PT/OT/ST等)専従1名配置</td></tr>
+            <tr><td>口腔・栄養スクリーニング加算(I)</td><td>通所介護・通所リハ</td><td class="num">20</td><td>月1回</td><td class="wrap-cell">6ヶ月毎のスクリーニング実施・記録</td></tr>
+            <tr><td>栄養アセスメント加算</td><td>通所・施設系</td><td class="num">50</td><td>月1回</td><td class="wrap-cell">管理栄養士配置、3ヶ月毎アセスメント</td></tr>
+            <tr><td>認知症専門ケア加算(I)</td><td>通所・訪問・施設系</td><td class="num">3</td><td>1日ごと</td><td class="wrap-cell">認知症III以上が利用者の1/2以上、実践リーダー研修修了者配置</td></tr>
+            <tr><td>サービス提供体制強化加算(I)</td><td>通所・訪問・施設系</td><td class="num">22</td><td>1回ごと</td><td class="wrap-cell">介護福祉士比率要件、研修計画の策定</td></tr>
+            <tr><td>生活機能向上連携加算(I)</td><td>通所介護・訪問介護</td><td class="num">100</td><td>月1回</td><td class="wrap-cell">外部リハ専門職との連携アセスメント</td></tr>
+            <tr><td>入浴介助加算(II)</td><td>通所介護</td><td class="num">55</td><td>1回ごと</td><td class="wrap-cell">居宅訪問による浴室環境アセスメント</td></tr>
+            <tr><td>特定事業所加算(I)</td><td>訪問介護</td><td class="num">加算率20%</td><td>月次</td><td class="wrap-cell">計画的研修、月1回以上の会議、重度者対応要件</td></tr>
+            <tr><td>緊急時訪問看護加算</td><td>訪問看護</td><td class="num">574</td><td>月1回</td><td class="wrap-cell">24時間連絡体制の確保</td></tr>
+            <tr><td>日常生活継続支援加算</td><td>特別養護老人ホーム</td><td class="num">36</td><td>1日ごと</td><td class="wrap-cell">要介護4・5が7割以上、介護福祉士配置割合要件</td></tr>
+            <tr><td>排せつ支援加算(I)</td><td>特養・老健</td><td class="num">10</td><td>月1回</td><td class="wrap-cell">多職種評価、3ヶ月毎見直し、LIFE提出</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec2">
+    <div class="wrap">
+      <p class="kicker">2</p>
+      <h2>コアアルゴリズム</h2>
+
+      <h3>STEP 0 — 業務形態フィルタ</h3>
+      <p><code class="inline">service_type</code>が<code class="inline">applicable_services</code>に含まれない加算をここで除外する。以降のステップはフィルタ後の候補集合のみに対して実行する。</p>
+
+      <h3>STEP 1 — ギャップ分析</h3>
+      <p>加算ごとに3種類のギャップを算出する。</p>
+      <ul>
+        <li><strong>人員ギャップ</strong> — 必要な常勤換算数と現有人員数の差(不足分)</li>
+        <li><strong>運用ギャップ</strong> — 未整備の計画書作成・アセスメント頻度など手続き数(「ほぼ達成」自己申告があれば軽減)</li>
+        <li><strong>システムギャップ</strong> — LIFE提出等が必要な加算で、現行システムのLIFE連携対応度から算出</li>
+      </ul>
+
+      <h3>STEP 2 — 収益試算</h3>
+      <p>年間収益 = 単位数 &times; 算定頻度(月換算) &times; 対象利用者数 &times; 地域区分単価(円/単位) &times; 12ヶ月。対象利用者数は加算の性質に応じて調整する(例: 認知症専門ケア加算は認知症該当割合のみを対象人数とする)。</p>
+
+      <h3>STEP 3 — コスト試算</h3>
+      <p>初期コスト(システム導入・改修費)とランニングコスト(新規雇用が真に必要な場合のみの人件費、研修費、システム非対応分の運用工数換算)を分けて算出する。<strong>既に要件を満たしている場合は追加費用ゼロと判定</strong>することが、現実的な費用対効果算出の鍵となる。</p>
+
+      <h3>STEP 4 — 費用対効果ランキング(①)</h3>
+      <p>年間純利益 = 年間収益 &minus; ランニングコスト &minus; (初期コスト&divide;5年償却)。この値の降順で上位3〜5件を提示し、<strong>赤字(純利益がマイナス)の場合は明示的に警告フラグを立てる。</strong></p>
+
+      <h3>STEP 5 — 難易度評価(④の基礎)</h3>
+      <p>難易度スコア = 人員ギャップ&times;10 + システムギャップ&times;3 + 運用ギャップ&times;1。人員採用は解消に数ヶ月を要し裁量の余地が小さいため最重視し、書類・運用整備は裁量で解消しやすいため軽い重みとする。④のランキングは<strong>人員ギャップ=0の候補に限定した上で</strong>このスコアの昇順で並べる。</p>
+
+      <h3>STEP 6 — ロードマップ生成(③)</h3>
+      <p>ギャップの内訳に応じて「人員確保 → 運用手続き → システム対応 → 都道府県への体制届出」の順でステップを組み立てる。システム対応ステップでは<code class="inline">care_software</code>のLIFE連携対応度を参照し、「設定変更のみで対応可」「手動マッピングが必要」「別ツール導入を検討」の3段階でアドバイスを出し分ける。</p>
+    </div>
+  </section>
+
+  <section id="sec3">
+    <div class="wrap">
+      <p class="kicker">3</p>
+      <h2>出力フォーマットと計算例</h2>
+      <p>以下は参照実装のデモ用サンプル(通所介護・利用者45名・カイポケ利用・2級地)を手計算でトレースした結果。実行するとこの4種の出力が生成される。</p>
+
+      <h3>① 費用対効果ランキング(上位5件)</h3>
+    </div>
+    <div class="wide">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th></th><th>加算名</th><th class="num">年間増収見込み</th><th class="num">年間追加コスト</th><th class="num">年間純利益</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rank">1</span></td><td>入浴介助加算(II)</td><td class="num">5,944,752円</td><td class="num">0円</td><td class="num pos">+5,944,752円</td></tr>
+            <tr><td><span class="rank">2</span></td><td>個別機能訓練加算(I)ロ</td><td class="num">7,397,914円</td><td class="num">4,200,000円</td><td class="num pos">+3,197,914円</td></tr>
+            <tr><td><span class="rank">3</span></td><td>生活機能向上連携加算(I)</td><td class="num">600,480円</td><td class="num">0円</td><td class="num pos">+600,480円</td></tr>
+            <tr><td><span class="rank">4</span></td><td>科学的介護推進体制加算(I)</td><td class="num">240,192円</td><td class="num">70,000円</td><td class="num pos">+170,192円</td></tr>
+            <tr><td><span class="rank">5</span></td><td>口腔・栄養スクリーニング加算(I)</td><td class="num">120,096円</td><td class="num">0円</td><td class="num pos">+120,096円</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="callout gold">
+        <span class="lbl">参考:負の費用対効果の例</span>
+        栄養アセスメント加算を得るために管理栄養士1名を新規雇用した場合、年間収益は約30万円にとどまる一方、人件費は約450万円かかるため、<strong class="neg">年間純利益は約 &minus;4,199,760円</strong>となり赤字判定となる。他事業所からの巡回・外部委託等で人員要件を満たせないか、先に検討すべき典型例。
+      </div>
+
+      <h3>② コスト見積もり(抜粋)</h3>
+      <p>初期コストとランニングコストを候補全件について個別に提示する。人員ギャップがゼロの加算(サービス提供体制強化加算など)は初期・ランニングともに0円と算出され、書類・運用の微調整のみで着手できることが一目でわかる。</p>
+
+      <h3>③ 獲得ロードマップ(個別機能訓練加算(I)ロの例)</h3>
+      <ol>
+        <li>【人員】機能訓練指導員(PT/OT/ST等)を常勤換算 1.00 名相当、新規雇用または外部連携で確保する。</li>
+        <li>【運用】個別機能訓練計画書の作成</li>
+        <li>【運用】3ヶ月ごとの評価・見直し</li>
+        <li>【運用】生活機能向上を目的とした訓練の実施記録</li>
+        <li>【提出】都道府県・市町村へ加算算定に係る体制等状況一覧表を提出する。</li>
+      </ol>
+
+      <h3>④ 難易度が低い加算ランキング</h3>
+      <p>人員ギャップがゼロの候補に限定し、難易度スコア昇順で並べる。</p>
+    </div>
+    <div class="wide">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th></th><th>加算名</th><th class="num">難易度スコア</th><th class="num">年間純利益</th></tr></thead>
+          <tbody>
+            <tr><td><span class="rank">1</span></td><td>口腔・栄養スクリーニング加算(I)</td><td class="num">1.0</td><td class="num pos">+120,096円</td></tr>
+            <tr><td><span class="rank">2</span></td><td>生活機能向上連携加算(I)</td><td class="num">2.0</td><td class="num pos">+600,480円</td></tr>
+            <tr><td><span class="rank">3</span></td><td>科学的介護推進体制加算(I)</td><td class="num">2.6</td><td class="num pos">+170,192円</td></tr>
+            <tr><td><span class="rank">4</span></td><td>認知症専門ケア加算(I)</td><td class="num">3.0</td><td class="num neg">&minus;11,289円</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="wrap">
+      <p style="margin-top:1rem;">4位の認知症専門ケア加算(I)は人員要件を既に満たしており着手は容易だが、研修費用が収益をわずかに上回り純利益はマイナスとなる。<strong>「取りやすい」と「儲かる」は必ずしも一致しない</strong>ことを示す好例であり、④のランキングと①のランキングを必ず併記する設計上の理由でもある。</p>
+    </div>
+  </section>
+
+  <section id="sec4">
+    <div class="wrap">
+      <p class="kicker">4</p>
+      <h2>参照実装(Python)</h2>
+      <p>上記ロジックをそのまま実行可能な形にしたコード。加算マスタ(<code class="inline">ADDON_MASTER</code>)を差し替えるだけで全サービス類型・全加算に拡張できる構造にしている。</p>
+    </div>
+    <div class="wide">
+      <div class="code-panel">
+        <div class="code-head"><span>kasan_engine.py</span><span>Python 3.9+</span></div>
+        <pre><code>"""
+介護報酬加算 最適化提案エンジン - 参照実装
+=========================================
+
+設計方針
+--------
+1. 「加算マスタ」を業務ロジックから完全分離する。
+   単位数・算定要件は3年ごとの報酬改定（直近: 令和6年度=2024年度改定）や
+   毎年の処遇改善加算の運用見直しで変わるため、コード変更なしに
+   マスタ(JSON/DB)だけ更新すれば追随できる構造にする。
+2. このファイルの ADDON_MASTER は「代表例」であり全加算網羅ではない。
+   実運用では公式告示・通知に基づき全サービス種別・全加算をマスタ化すること。
+3. 単位数(unit_value)は令和6年度改定時点の代表値。地域区分による
+   1単位あたり単価(10.00円~11.40円)は REGION_UNIT_PRICE で調整する。
+   本番投入前に最新の告示単価表で検証すること。
+"""
+
+from dataclasses import dataclass, field
+from typing import Optional
+
+
+<span class="cm"># ---------------------------------------------------------------------------
+# 0. マスタ定数
+# ---------------------------------------------------------------------------</span>
+
+REGION_UNIT_PRICE = {
+    "1級地": 11.40, "2級地": 11.12, "3級地": 11.05, "4級地": 10.84,
+    "5級地": 10.70, "6級地": 10.42, "7級地": 10.21, "その他": 10.00,
+}
+
+CARE_SOFTWARE_LIFE_SUPPORT = {
+    "カイポケ": 0.8, "ワイズマン": 0.9, "ほのぼの": 0.8,
+    "ケアカルテ": 0.7, "その他": 0.3,
+}
+
+
+@dataclass
+class StaffInfo:
+    care_worker_ftv: float
+    nurse_count: float = 0
+    dietitian_count: float = 0
+    rehab_staff_count: float = 0
+    care_manager_count: float = 0
+    trained_dementia_staff: int = 0
+
+
+@dataclass
+class UserComposition:
+    support1: int = 0
+    support2: int = 0
+    care1: int = 0
+    care2: int = 0
+    care3: int = 0
+    care4: int = 0
+    care5: int = 0
+    dementia_ratio: float = 0.0
+    high_medical_need_ratio: float = 0.0
+
+    @property
+    def total_users(self) -> int:
+        return (self.support1 + self.support2 + self.care1 + self.care2
+                + self.care3 + self.care4 + self.care5)
+
+    @property
+    def total_care_only(self) -> int:
+        return self.care1 + self.care2 + self.care3 + self.care4 + self.care5
+
+    @property
+    def mid_to_high_care_ratio(self) -> float:
+        denom = self.total_care_only
+        if denom == 0:
+            return 0.0
+        return (self.care3 + self.care4 + self.care5) / denom
+
+
+@dataclass
+class FacilityInput:
+    service_type: str
+    staff: StaffInfo
+    users: UserComposition
+    current_addons: set = field(default_factory=set)
+    near_miss_addons: set = field(default_factory=set)
+    care_software: str = "その他"
+    region_class: str = "その他"
+
+    @property
+    def unit_price(self) -> float:
+        return REGION_UNIT_PRICE.get(self.region_class, 10.00)
+
+
+@dataclass
+class AddonMaster:
+    code: str
+    name: str
+    applicable_services: list
+    unit_value: float
+    billing_basis: str
+    monthly_frequency: float
+    requirement_staff: dict
+    requirement_process: list
+    requires_life_submission: bool = False
+    hiring_needed_role: Optional[str] = None
+    hiring_annual_cost: float = 0.0
+    training_annual_cost: float = 0.0
+    system_initial_cost: float = 0.0
+    notes: str = ""
+
+
+<span class="cm"># ---------------------------------------------------------------------------
+# 1. 加算マスタ（代表例。実運用では全加算を網羅したDB/JSONに置き換える）
+# ---------------------------------------------------------------------------</span>
+
+ADDON_MASTER = [
+    AddonMaster(
+        code="LIFE_KAGAKUTEKI", name="科学的介護推進体制加算(I)",
+        applicable_services=["通所介護", "訪問看護", "特別養護老人ホーム",
+                              "介護老人保健施設", "通所リハビリテーション"],
+        unit_value=40, billing_basis="per_month", monthly_frequency=1,
+        requirement_staff={},
+        requirement_process=["利用者ごとのADL・栄養・口腔等の情報をLIFEへ提出",
+                              "フィードバックを踏まえたケア計画の見直し(PDCA)"],
+        requires_life_submission=True, training_annual_cost=50000,
+        notes="人員要件なし。既存ソフトのLIFE連携機能があれば追加投資はほぼ不要。",
+    ),
+    AddonMaster(
+        code="KOBETSU_KINOU_I", name="個別機能訓練加算(I)ロ",
+        applicable_services=["通所介護"],
+        unit_value=56, billing_basis="per_visit", monthly_frequency=22,
+        requirement_staff={"rehab_staff_count": 1},
+        requirement_process=["個別機能訓練計画書の作成", "3ヶ月ごとの評価・見直し",
+                              "生活機能向上を目的とした訓練の実施記録"],
+        hiring_needed_role="機能訓練指導員(PT/OT/ST等)", hiring_annual_cost=4200000,
+        notes="専従1名(非常勤可)配置で算定可。常勤専従化で(II)への上位も検討可。",
+    ),
+    <span class="cm"># ... KOUKUEIYOU_SCREEN / EIYOU_ASSESSMENT / NINCHISHOU_SENMON_I /
+    #     SEISAN_TEISEI_KYOKA / SEIKATSU_KINOU_RENKEI / NYUYOKU_KAIJO_II /
+    #     TOKUTEI_JIGYOSHO_I / KANKYU_HOMON_KANGO / NICHIJO_KEIZOKU /
+    #     HAISETSU_SHIEN も同一スキーマで定義（§1.3の表を参照。全文は
+    #     kasan_engine.py 本体を参照）</span>
+]
+
+
+<span class="cm"># ---------------------------------------------------------------------------
+# 2. コアアルゴリズム
+# ---------------------------------------------------------------------------</span>
+
+def filter_by_service(facility: FacilityInput) -> list:
+    <span class="cm">"""STEP0: 業務形態に存在しない加算を除外する。"""</span>
+    return [a for a in ADDON_MASTER if facility.service_type in a.applicable_services]
+
+
+def compute_requirement_gap(facility: FacilityInput, addon: AddonMaster) -> dict:
+    <span class="cm">"""STEP1: 現状の人員・利用者構成と加算要件の差分(ギャップ)を計算する。"""</span>
+    staff = facility.staff
+    gap = {"staffing_gap": 0.0, "process_gap": 0, "system_gap": 0.0}
+
+    for role, required in addon.requirement_staff.items():
+        current = getattr(staff, role, 0)
+        if current < required:
+            gap["staffing_gap"] += (required - current)
+
+    gap["process_gap"] = len(addon.requirement_process)
+
+    if addon.requires_life_submission:
+        life_support = CARE_SOFTWARE_LIFE_SUPPORT.get(facility.care_software, 0.3)
+        gap["system_gap"] = round((1 - life_support), 2)
+
+    return gap
+
+
+def estimate_annual_revenue(facility: FacilityInput, addon: AddonMaster) -> float:
+    <span class="cm">"""STEP2: 加算による想定年間請求増加額を算出する。"""</span>
+    total_users = facility.users.total_users or 1
+
+    if addon.code == "NINCHISHOU_SENMON_I":
+        eligible = total_users * facility.users.dementia_ratio
+    elif addon.code == "NICHIJO_KEIZOKU":
+        eligible = facility.users.care4 + facility.users.care5
+    else:
+        eligible = total_users
+
+    monthly_units = addon.unit_value * addon.monthly_frequency * eligible
+    monthly_yen = monthly_units * facility.unit_price
+    return round(monthly_yen * 12, 0)
+
+
+def estimate_annual_cost(facility: FacilityInput, addon: AddonMaster, gap: dict) -> dict:
+    <span class="cm">"""STEP3: 初期コストとランニングコストを見積もる。"""</span>
+    running_cost = 0.0
+    initial_cost = addon.system_initial_cost
+
+    if gap["staffing_gap"] > 0 and addon.hiring_needed_role:
+        running_cost += addon.hiring_annual_cost * min(gap["staffing_gap"], 1.0)
+
+    running_cost += addon.training_annual_cost
+
+    if gap["system_gap"] > 0:
+        running_cost += gap["system_gap"] * 100000
+
+    return {"initial_cost": initial_cost, "running_cost_annual": running_cost}
+
+
+def compute_difficulty_score(gap: dict) -> float:
+    <span class="cm">"""STEP5: 難易度スコア。値が小さいほど「獲得しやすい」。"""</span>
+    return (gap["staffing_gap"] * 10.0
+            + gap["system_gap"] * 3.0
+            + gap["process_gap"] * 1.0)
+
+
+def generate_roadmap(facility: FacilityInput, addon: AddonMaster, gap: dict) -> list:
+    <span class="cm">"""STEP6: 要件クリアへのロードマップを順序立てて生成する。"""</span>
+    steps = []
+    step_no = 1
+
+    if gap["staffing_gap"] > 0:
+        steps.append(f"{step_no}. 【人員】{addon.hiring_needed_role or '必要職種'}を"
+                      f"常勤換算 {gap['staffing_gap']:.2f} 名相当、新規雇用または外部連携で確保する。")
+        step_no += 1
+
+    for process in addon.requirement_process:
+        steps.append(f"{step_no}. 【運用】{process}")
+        step_no += 1
+
+    if addon.requires_life_submission:
+        life_support = CARE_SOFTWARE_LIFE_SUPPORT.get(facility.care_software, 0.3)
+        if life_support >= 0.8:
+            sys_note = f"{facility.care_software}はLIFE連携機能を標準搭載。設定を有効化するだけで対応可能。"
+        elif life_support >= 0.5:
+            sys_note = f"{facility.care_software}はエクスポート対応済みだが手動マッピングが必要。"
+        else:
+            sys_note = f"{facility.care_software}は連携が弱いため専用ツール導入を検討。"
+        steps.append(f"{step_no}. 【システム】{sys_note}")
+        step_no += 1
+
+    steps.append(f"{step_no}. 【提出】都道府県・市町村へ体制等状況一覧表を提出する。")
+    return steps
+
+
+@dataclass
+class AddonResult:
+    addon: AddonMaster
+    gap: dict
+    annual_revenue: float
+    initial_cost: float
+    running_cost_annual: float
+    net_annual_profit: float
+    difficulty_score: float
+    roadmap: list
+
+
+def analyze(facility: FacilityInput) -> list:
+    candidates = filter_by_service(facility)
+    results = []
+
+    for addon in candidates:
+        if addon.code in facility.current_addons:
+            continue
+
+        gap = compute_requirement_gap(facility, addon)
+        if addon.code in facility.near_miss_addons:
+            gap["process_gap"] = max(0, gap["process_gap"] - 1)
+
+        revenue = estimate_annual_revenue(facility, addon)
+        cost = estimate_annual_cost(facility, addon, gap)
+        amortized_initial = cost["initial_cost"] / 5
+        net_profit = revenue - cost["running_cost_annual"] - amortized_initial
+        difficulty = compute_difficulty_score(gap)
+        roadmap = generate_roadmap(facility, addon, gap)
+
+        results.append(AddonResult(
+            addon=addon, gap=gap, annual_revenue=revenue,
+            initial_cost=cost["initial_cost"],
+            running_cost_annual=cost["running_cost_annual"],
+            net_annual_profit=net_profit, difficulty_score=difficulty,
+            roadmap=roadmap,
+        ))
+
+    return results
+
+
+def build_report(facility: FacilityInput, top_n: int = 5) -> dict:
+    <span class="cm">"""4つの出力(①②③④)をまとめて生成する。"""</span>
+    results = analyze(facility)
+
+    cost_effectiveness_rank = sorted(
+        results, key=lambda r: r.net_annual_profit, reverse=True)[:top_n]
+
+    easy_candidates = [r for r in results if r.gap["staffing_gap"] == 0]
+    ease_rank = sorted(easy_candidates, key=lambda r: r.difficulty_score)[:top_n]
+
+    return {
+        "① 費用対効果ランキング": [
+            {"加算名": r.addon.name, "年間増収見込み": f"{r.annual_revenue:,.0f}円",
+             "年間追加コスト": f"{(r.running_cost_annual + r.initial_cost/5):,.0f}円",
+             "年間純利益": f"{r.net_annual_profit:,.0f}円",
+             "赤字警告": r.net_annual_profit < 0}
+            for r in cost_effectiveness_rank
+        ],
+        "② コスト見積もり": [
+            {"加算名": r.addon.name, "初期コスト": f"{r.initial_cost:,.0f}円",
+             "ランニングコスト(年間)": f"{r.running_cost_annual:,.0f}円"}
+            for r in results
+        ],
+        "③ 獲得ロードマップ": [
+            {"加算名": r.addon.name, "手順": r.roadmap} for r in cost_effectiveness_rank
+        ],
+        "④ 難易度が低い加算ランキング": [
+            {"加算名": r.addon.name, "難易度スコア": round(r.difficulty_score, 1),
+             "年間純利益": f"{r.net_annual_profit:,.0f}円"}
+            for r in ease_rank
+        ],
+    }</code></pre>
+      </div>
+      <p style="max-width:none;">全体の完全版(サンプルマスタ全12件・デモ実行部を含む)は <code class="inline">kasan_engine.py</code> として保存済み。</p>
+    </div>
+  </section>
+
+  <section id="sec5">
+    <div class="wrap">
+      <p class="kicker">5</p>
+      <h2>運用上の注意</h2>
+      <ul>
+        <li><strong>単位数の更新体制</strong> — マスタは3年に一度の報酬改定に加え、処遇改善加算のように毎年運用が変わるものもあるため、更新責任者と更新タイミングを社内規程として明文化する。</li>
+        <li><strong>地域区分・サービス種別ごとの単価差</strong> — 本実装は簡略化した地域区分単価を採用しているが、実際は1級地〜その他の8区分に加えサービス種別ごとに単価係数が異なる。本番マスタでは区分×サービス種別のテーブルを持たせること。</li>
+        <li><strong>併算定制限・逓減制</strong> — 一部の加算は同時算定不可(併給調整)や利用者数に応じた逓減制が存在する。STEP2の収益試算にはこれらの制約を追加考慮するロジックを組み込む必要がある。</li>
+        <li><strong>対象利用者数の精緻化</strong> — 本サンプルでは加算ごとに簡略化した対象者算出ルールを用いている。実運用では加算ごとに対象者算出関数を個別定義するのが望ましい。</li>
+        <li><strong>既存業務システムとの連携</strong> — カイポケ・ワイズマン・ほのぼの・ケアカルテ等のCSVエクスポート機能の対応範囲は頻繁にアップデートされるため、<code class="inline">CARE_SOFTWARE_LIFE_SUPPORT</code>の値は各社の最新仕様書で定期検証する。</li>
+      </ul>
+    </div>
+    <footer class="doc-foot">
+      <div class="wrap" style="padding:0;">
+        <p>本設計書はロジック・アルゴリズムの提示を目的とした参考資料であり、個別の加算算定可否を保証するものではない。実際の算定にあたっては、指定権者(都道府県・市町村)への確認および専門家(社会保険労務士・行政書士等)への相談を推奨する。</p>
+      </div>
+    </footer>
+  </section>
+</div>

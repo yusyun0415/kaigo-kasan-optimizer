@@ -1,0 +1,629 @@
+<title>介護報酬加算 最適化提案ツール</title>
+<style>
+:root{
+  --paper:#F5F4EF; --panel:#FFFFFF; --ink:#1C2321; --ink-soft:#4B534F;
+  --accent:#1F6E5C; --accent-soft:#E3EEE9;
+  --gold:#B8863B; --gold-soft:#F4E9D6;
+  --danger:#A23B2E; --danger-soft:#F6E4E0;
+  --line:#DAD6C9; --input-bg:#FBFAF7;
+  --font-display:"Hiragino Mincho ProN","Yu Mincho","YuMincho",serif;
+  --font-body:"Hiragino Sans","Yu Gothic Medium","Yu Gothic","Meiryo",sans-serif;
+  --font-mono:"Cascadia Code","Consolas","BIZ UDGothic","MS Gothic",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#14181A; --panel:#1B211F; --ink:#E8E6DE; --ink-soft:#A9B0AA;
+    --accent:#4FA98F; --accent-soft:#1D2E29;
+    --gold:#D9A857; --gold-soft:#2E2618;
+    --danger:#D97462; --danger-soft:#34211D;
+    --line:#333B37; --input-bg:#202624;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14181A; --panel:#1B211F; --ink:#E8E6DE; --ink-soft:#A9B0AA;
+  --accent:#4FA98F; --accent-soft:#1D2E29;
+  --gold:#D9A857; --gold-soft:#2E2618;
+  --danger:#D97462; --danger-soft:#34211D;
+  --line:#333B37; --input-bg:#202624;
+}
+:root[data-theme="light"]{
+  --paper:#F5F4EF; --panel:#FFFFFF; --ink:#1C2321; --ink-soft:#4B534F;
+  --accent:#1F6E5C; --accent-soft:#E3EEE9;
+  --gold:#B8863B; --gold-soft:#F4E9D6;
+  --danger:#A23B2E; --danger-soft:#F6E4E0;
+  --line:#DAD6C9; --input-bg:#FBFAF7;
+}
+*{box-sizing:border-box;}
+body{margin:0;}
+.page{background:var(--paper); color:var(--ink); font-family:var(--font-body); line-height:1.7; font-size:15.5px;}
+.shell{max-width:1180px;margin:0 auto;padding:2.4rem 1.5rem 5rem;}
+
+/* header */
+header.top{padding-bottom:1.6rem; border-bottom:1px solid var(--line); margin-bottom:1.8rem;}
+.eyebrow{font-size:.76rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 .5rem;}
+h1{font-family:var(--font-display); font-weight:600; font-size:1.75rem; margin:0 0 .5rem; text-wrap:balance;}
+.lede{color:var(--ink-soft); margin:0 0 1.1rem; max-width:62ch; text-wrap:balance;}
+.callout{border-left:3px solid var(--danger); background:var(--danger-soft); padding:.8rem 1.1rem; border-radius:2px; font-size:.85rem; max-width:74ch;}
+.callout b{color:var(--danger);}
+
+/* layout */
+.grid{display:grid; grid-template-columns:minmax(340px,420px) 1fr; gap:1.8rem; align-items:start;}
+@media (max-width:960px){ .grid{grid-template-columns:1fr;} }
+
+/* panels */
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.5rem 1.5rem 1.7rem;}
+.panel + .panel{margin-top:1.2rem;}
+fieldset{border:none; margin:0 0 1.5rem; padding:0;}
+fieldset:last-of-type{margin-bottom:0;}
+legend{font-family:var(--font-display); font-size:1.02rem; font-weight:600; padding:0 0 .8rem; width:100%; border-bottom:1px solid var(--line); margin-bottom:1rem;}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:.7rem 1rem; margin-bottom:.7rem;}
+.field-row.single{grid-template-columns:1fr;}
+label{display:block; font-size:.8rem; color:var(--ink-soft); margin-bottom:.3rem;}
+input[type="number"], select{
+  width:100%; padding:.5rem .6rem; font-size:.92rem; font-family:var(--font-body);
+  background:var(--input-bg); border:1px solid var(--line); border-radius:5px; color:var(--ink);
+}
+input[type="number"]:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible{
+  outline:2px solid var(--accent); outline-offset:1px;
+}
+.hint{font-size:.74rem; color:var(--ink-soft); margin-top:.15rem;}
+
+.addon-check-list{display:grid; gap:.5rem; max-height:260px; overflow-y:auto; padding-right:.3rem;}
+.addon-check{
+  display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:.6rem;
+  padding:.5rem .6rem; border:1px solid var(--line); border-radius:5px; font-size:.82rem;
+}
+.addon-check .nm{color:var(--ink);}
+.addon-check label{display:flex; align-items:center; gap:.35rem; margin:0; color:var(--ink-soft); font-size:.74rem; white-space:nowrap;}
+.addon-check input[type="checkbox"]{width:auto; accent-color:var(--accent);}
+
+.btn-row{display:flex; gap:.7rem; margin-top:1.6rem; flex-wrap:wrap;}
+button{
+  font-family:var(--font-body); font-weight:700; font-size:.9rem; border-radius:6px; cursor:pointer;
+  padding:.75rem 1.3rem; border:1px solid transparent;
+}
+button.primary{background:var(--accent); color:var(--paper);}
+button.primary:hover{filter:brightness(1.08);}
+button.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
+button.ghost:hover{border-color:var(--accent); color:var(--accent);}
+
+/* results */
+.empty-state{display:flex; align-items:center; justify-content:center; min-height:380px; color:var(--ink-soft); font-size:.92rem; text-align:center; padding:2rem;}
+.results{display:none;}
+.results.show{display:block;}
+.section-title{display:flex; align-items:baseline; gap:.6rem; margin:0 0 .3rem;}
+.section-title .mark{font-family:var(--font-display); font-size:1.3rem; color:var(--accent); font-weight:700;}
+.section-title h2{font-family:var(--font-display); font-size:1.15rem; margin:0; font-weight:600;}
+.section-note{font-size:.8rem; color:var(--ink-soft); margin:0 0 1rem;}
+
+.table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:6px;}
+table{border-collapse:collapse; width:100%; font-size:.84rem; min-width:560px;}
+th, td{padding:.6rem .8rem; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap;}
+th{background:var(--accent-soft); color:var(--accent); font-weight:700; font-size:.72rem; letter-spacing:.03em; text-transform:uppercase;}
+tbody tr:last-child td{border-bottom:none;}
+td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
+.rank-badge{
+  display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem;
+  border-radius:50%; background:var(--gold-soft); color:var(--gold); font-weight:700; font-size:.76rem;
+  font-variant-numeric:tabular-nums;
+}
+.pill{display:inline-flex; align-items:center; gap:.3rem; padding:.15rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700; font-variant-numeric:tabular-nums;}
+.pill.ok{background:var(--accent-soft); color:var(--accent);}
+.pill.warn{background:var(--danger-soft); color:var(--danger);}
+.profit-pos{color:var(--accent); font-weight:700;}
+.profit-neg{color:var(--danger); font-weight:700;}
+
+.roadmap-list{display:grid; gap:.7rem; margin-bottom:1.6rem;}
+.roadmap-card{border:1px solid var(--line); border-radius:6px; background:var(--input-bg);}
+.roadmap-card summary{
+  list-style:none; cursor:pointer; padding:.85rem 1rem; display:flex; justify-content:space-between;
+  align-items:center; gap:.8rem; font-size:.9rem; font-weight:700;
+}
+.roadmap-card summary::-webkit-details-marker{display:none;}
+.roadmap-card summary .arrow{color:var(--ink-soft); font-size:.8rem; transition:transform .15s ease;}
+.roadmap-card[open] summary .arrow{transform:rotate(90deg);}
+.roadmap-card ol{margin:0; padding:0 1.3rem 1rem 1.6rem; font-size:.84rem;}
+.roadmap-card li{margin-bottom:.45rem;}
+.roadmap-card li:last-child{margin-bottom:0;}
+
+.result-block{margin-bottom:2.4rem;}
+.result-block:last-child{margin-bottom:0;}
+.small-note{font-size:.78rem; color:var(--ink-soft); margin-top:.6rem;}
+
+@media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+</style>
+
+<div class="page">
+  <div class="shell">
+    <header class="top">
+      <p class="eyebrow">Interactive Tool</p>
+      <h1>介護報酬加算 最適化提案ツール</h1>
+      <p class="lede">施設の基本情報を入力すると、その場で費用対効果ランキング・コスト見積もり・獲得ロードマップ・難易度ランキングを算出します。</p>
+      <div class="callout">
+        <b>注意:</b> 単位数・人件費・システム費用はロジック提示用の代表値です。実際の算定判断には最新の告示・単価表での確認が必要です。マスタは代表12加算のみ収録(全加算網羅ではありません)。
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: FORM -->
+      <div>
+        <form id="facility-form">
+          <div class="panel">
+            <fieldset>
+              <legend>A. 業務形態</legend>
+              <div class="field-row single">
+                <div>
+                  <label for="service_type">サービス類型</label>
+                  <select id="service_type" name="service_type"></select>
+                </div>
+              </div>
+              <div class="field-row single">
+                <div>
+                  <label for="region_class">地域区分</label>
+                  <select id="region_class" name="region_class"></select>
+                </div>
+              </div>
+              <div class="field-row single">
+                <div>
+                  <label for="care_software">利用中の業務システム</label>
+                  <select id="care_software" name="care_software"></select>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>B. 人員配置(常勤換算)</legend>
+              <div class="field-row">
+                <div><label for="care_worker_ftv">介護職員</label><input type="number" min="0" step="0.1" id="care_worker_ftv" value="6.0"></div>
+                <div><label for="nurse_count">看護師</label><input type="number" min="0" step="0.1" id="nurse_count" value="1.0"></div>
+              </div>
+              <div class="field-row">
+                <div><label for="dietitian_count">管理栄養士</label><input type="number" min="0" step="0.1" id="dietitian_count" value="0"></div>
+                <div><label for="rehab_staff_count">PT/OT/ST</label><input type="number" min="0" step="0.1" id="rehab_staff_count" value="0"></div>
+              </div>
+              <div class="field-row">
+                <div><label for="care_manager_count">ケアマネジャー</label><input type="number" min="0" step="0.1" id="care_manager_count" value="1.0"></div>
+                <div><label for="trained_dementia_staff">認知症実践リーダー研修修了者</label><input type="number" min="0" step="1" id="trained_dementia_staff" value="1"></div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>C. 利用者ステータス(人数)</legend>
+              <div class="field-row">
+                <div><label for="support1">要支援1</label><input type="number" min="0" step="1" id="support1" value="5"></div>
+                <div><label for="support2">要支援2</label><input type="number" min="0" step="1" id="support2" value="8"></div>
+              </div>
+              <div class="field-row">
+                <div><label for="care1">要介護1</label><input type="number" min="0" step="1" id="care1" value="10"></div>
+                <div><label for="care2">要介護2</label><input type="number" min="0" step="1" id="care2" value="12"></div>
+              </div>
+              <div class="field-row">
+                <div><label for="care3">要介護3</label><input type="number" min="0" step="1" id="care3" value="6"></div>
+                <div><label for="care4">要介護4</label><input type="number" min="0" step="1" id="care4" value="3"></div>
+              </div>
+              <div class="field-row">
+                <div><label for="care5">要介護5</label><input type="number" min="0" step="1" id="care5" value="1"></div>
+                <div></div>
+              </div>
+              <div class="field-row">
+                <div><label for="dementia_ratio">認知症自立度III以上の割合(%)</label><input type="number" min="0" max="100" step="1" id="dementia_ratio" value="35"></div>
+                <div><label for="high_medical_need_ratio">医療依存度が高い利用者の割合(%)</label><input type="number" min="0" max="100" step="1" id="high_medical_need_ratio" value="5"></div>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="panel">
+            <fieldset>
+              <legend>D. 現在の加算取得状況</legend>
+              <p class="hint" style="margin-bottom:.8rem;">選択中のサービス類型に該当する加算のみ表示されます。「取得済み」は提案対象から除外、「ほぼ達成」は難易度計算で考慮されます。</p>
+              <div id="addon-checklist" class="addon-check-list"></div>
+            </fieldset>
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="primary">分析する</button>
+            <button type="button" id="load-sample" class="ghost">サンプルデータを読み込む</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT: RESULTS -->
+      <div>
+        <div class="panel" id="results-panel">
+          <div class="empty-state" id="empty-state">左のフォームに施設情報を入力し「分析する」を押すと、<br>ここに①〜④の分析結果が表示されます。</div>
+          <div class="results" id="results">
+            <div class="result-block">
+              <div class="section-title"><span class="mark">①</span><h2>費用対効果ランキング(上位5件)</h2></div>
+              <p class="section-note">年間純利益(想定収益&minus;想定追加コスト)が高い順。赤字が見込まれる場合は警告を表示します。</p>
+              <div class="table-scroll"><table id="table-roi"><thead><tr><th></th><th>加算名</th><th class="num">年間増収見込み</th><th class="num">年間追加コスト</th><th class="num">年間純利益</th><th>判定</th></tr></thead><tbody></tbody></table></div>
+            </div>
+
+            <div class="result-block">
+              <div class="section-title"><span class="mark">②</span><h2>コスト見積もり(候補全件)</h2></div>
+              <p class="section-note">初期コストとランニングコスト(年間)の内訳。行を開くと獲得手順も確認できます。</p>
+              <div id="cost-list"></div>
+            </div>
+
+            <div class="result-block">
+              <div class="section-title"><span class="mark">③</span><h2>獲得ロードマップ(①上位5件)</h2></div>
+              <p class="section-note">要件クリアの手順を、人員確保→運用整備→システム対応→届出の順で提示します。</p>
+              <div class="roadmap-list" id="roadmap-list"></div>
+            </div>
+
+            <div class="result-block">
+              <div class="section-title"><span class="mark">④</span><h2>難易度が低い加算ランキング</h2></div>
+              <p class="section-note">人員の新規採用がほぼ不要な候補に限定し、難易度スコア(低いほど容易)昇順で表示します。</p>
+              <div class="table-scroll"><table id="table-ease"><thead><tr><th></th><th>加算名</th><th class="num">難易度スコア</th><th class="num">年間純利益</th></tr></thead><tbody></tbody></table></div>
+              <p class="small-note" id="ease-empty-note" style="display:none;">人員ギャップがゼロの候補が現在ありません。まずは①③で人員確保の要否をご確認ください。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------------
+ * 0. マスタ定数
+ * ------------------------------------------------------------------- */
+const REGION_UNIT_PRICE = {
+  "1級地":11.40, "2級地":11.12, "3級地":11.05, "4級地":10.84,
+  "5級地":10.70, "6級地":10.42, "7級地":10.21, "その他":10.00,
+};
+const CARE_SOFTWARE_LIFE_SUPPORT = {
+  "カイポケ":0.8, "ワイズマン":0.9, "ほのぼの":0.8, "ケアカルテ":0.7, "その他":0.3,
+};
+const SERVICE_TYPES = ["通所介護","訪問介護","訪問看護","特別養護老人ホーム","介護老人保健施設","通所リハビリテーション","グループホーム"];
+
+const ADDON_MASTER = [
+  { code:"LIFE_KAGAKUTEKI", name:"科学的介護推進体制加算(I)",
+    applicable_services:["通所介護","訪問看護","特別養護老人ホーム","介護老人保健施設","通所リハビリテーション"],
+    unit_value:40, billing_basis:"per_month", monthly_frequency:1,
+    requirement_staff:{}, requirement_process:["利用者ごとのADL・栄養・口腔等の情報をLIFEへ提出","フィードバックを踏まえたケア計画の見直し(PDCA)"],
+    requires_life_submission:true, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:50000, system_initial_cost:0,
+    notes:"人員要件なし。既存ソフトのLIFE連携機能があれば追加投資はほぼ不要。" },
+
+  { code:"KOBETSU_KINOU_I", name:"個別機能訓練加算(I)ロ",
+    applicable_services:["通所介護"],
+    unit_value:56, billing_basis:"per_visit", monthly_frequency:22,
+    requirement_staff:{rehab_staff_count:1}, requirement_process:["個別機能訓練計画書の作成","3ヶ月ごとの評価・見直し","生活機能向上を目的とした訓練の実施記録"],
+    requires_life_submission:false, hiring_needed_role:"機能訓練指導員(PT/OT/ST等)", hiring_annual_cost:4200000, training_annual_cost:0, system_initial_cost:0,
+    notes:"専従1名(非常勤可)配置で算定可。常勤専従化で(II)への上位も検討可。" },
+
+  { code:"KOUKUEIYOU_SCREEN", name:"口腔・栄養スクリーニング加算(I)",
+    applicable_services:["通所介護","通所リハビリテーション"],
+    unit_value:20, billing_basis:"per_month", monthly_frequency:1,
+    requirement_staff:{}, requirement_process:["6ヶ月に1回、口腔・栄養状態のスクリーニングを実施し記録","居宅介護支援事業所への情報提供"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"人員要件なし。既存職員での実施が可能なため難易度は低い。" },
+
+  { code:"EIYOU_ASSESSMENT", name:"栄養アセスメント加算",
+    applicable_services:["通所介護","通所リハビリテーション","特別養護老人ホーム","介護老人保健施設"],
+    unit_value:50, billing_basis:"per_month", monthly_frequency:1,
+    requirement_staff:{dietitian_count:1}, requirement_process:["管理栄養士による栄養アセスメントの実施(利用開始時・3ヶ月毎)","多職種連携での栄養ケア計画作成"],
+    requires_life_submission:false, hiring_needed_role:"管理栄養士", hiring_annual_cost:4500000, training_annual_cost:0, system_initial_cost:0,
+    notes:"他事業所との連携(栄養士外部委託・巡回)で常勤雇用を回避できる場合あり。" },
+
+  { code:"NINCHISHOU_SENMON_I", name:"認知症専門ケア加算(I)",
+    applicable_services:["通所介護","訪問介護","特別養護老人ホーム","介護老人保健施設","グループホーム"],
+    unit_value:3, billing_basis:"per_day", monthly_frequency:22,
+    requirement_staff:{trained_dementia_staff:1}, requirement_process:["認知症日常生活自立度III以上の利用者が利用者の半数以上","認知症介護実践リーダー研修修了者の配置","認知症ケアに関する会議を定期開催"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:150000, system_initial_cost:0,
+    notes:"対象者割合(認知症III以上が全体の1/2以上)を満たすかが最大の分岐点。" },
+
+  { code:"SEISAN_TEISEI_KYOKA", name:"サービス提供体制強化加算(I)",
+    applicable_services:["通所介護","訪問介護","訪問看護","特別養護老人ホーム","介護老人保健施設"],
+    unit_value:22, billing_basis:"per_visit", monthly_frequency:22,
+    requirement_staff:{}, requirement_process:["介護福祉士の割合が利用者に対し一定割合以上(サービス種別ごとに規定)","職員研修計画の策定・実施","会議の定期開催"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"有資格者比率が既に高い事業所は追加投資ゼロで即算定可能な典型例。" },
+
+  { code:"SEIKATSU_KINOU_RENKEI", name:"生活機能向上連携加算(I)",
+    applicable_services:["通所介護","訪問介護"],
+    unit_value:100, billing_basis:"per_month", monthly_frequency:1,
+    requirement_staff:{}, requirement_process:["外部のリハ専門職(訪問リハ事業所等)と連携しアセスメント","個別サービス計画への反映"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"自前でPT/OT/ST雇用不要。外部連携のみで算定可能な低コスト加算。" },
+
+  { code:"NYUYOKU_KAIJO_II", name:"入浴介助加算(II)",
+    applicable_services:["通所介護"],
+    unit_value:55, billing_basis:"per_visit", monthly_frequency:18,
+    requirement_staff:{rehab_staff_count:0.1}, requirement_process:["利用者の居宅を訪問し浴室環境等をアセスメント","個浴等、居宅の状況に近い環境での入浴介助計画作成"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"訪問アセスメントの運用構築が主な負荷。0.1名相当の小さな不足は既存職員の再配置で吸収する前提。" },
+
+  { code:"TOKUTEI_JIGYOSHO_I", name:"特定事業所加算(I)",
+    applicable_services:["訪問介護"],
+    unit_value:190, billing_basis:"per_visit", monthly_frequency:25,
+    requirement_staff:{care_worker_ftv:0}, requirement_process:["訪問介護員等の計画的な研修実施","会議の定期開催(月1回以上)","重度要介護者等対応要件を満たす","サービス提供責任者の要件充足"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"本来は総単位数×20%の加算率型。ここでは1回あたりの想定加算額に単純換算した代表値。" },
+
+  { code:"KANKYU_HOMON_KANGO", name:"緊急時訪問看護加算",
+    applicable_services:["訪問看護"],
+    unit_value:574, billing_basis:"per_month", monthly_frequency:1,
+    requirement_staff:{nurse_count:1}, requirement_process:["24時間連絡体制の確保","利用者への説明・同意取得"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"既存看護師でオンコール体制を組める場合は追加人件費なしで算定可。" },
+
+  { code:"NICHIJO_KEIZOKU", name:"日常生活継続支援加算",
+    applicable_services:["特別養護老人ホーム"],
+    unit_value:36, billing_basis:"per_day", monthly_frequency:30,
+    requirement_staff:{care_worker_ftv:0}, requirement_process:["要介護4・5の入所者割合が7割以上","介護福祉士の配置割合要件(6割以上等)を充足"],
+    requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"重度者割合と介護福祉士比率の2条件。人員要件充足がボトルネックになりやすい。" },
+
+  { code:"HAISETSU_SHIEN", name:"排せつ支援加算(I)",
+    applicable_services:["特別養護老人ホーム","介護老人保健施設"],
+    unit_value:10, billing_basis:"per_month", monthly_frequency:1,
+    requirement_staff:{}, requirement_process:["医師・看護師・介護支援専門員等が排せつ状態を評価","支援計画作成と3ヶ月ごとの見直し","LIFEへの提出"],
+    requires_life_submission:true, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
+    notes:"多職種評価さえ運用化できれば追加投資は小さい。" },
+];
+
+/* ---------------------------------------------------------------------
+ * 1. コアアルゴリズム(kasan_engine.py の1:1移植)
+ * ------------------------------------------------------------------- */
+function totalUsers(u){ return u.support1+u.support2+u.care1+u.care2+u.care3+u.care4+u.care5; }
+
+function filterByService(facility){
+  return ADDON_MASTER.filter(a => a.applicable_services.includes(facility.service_type));
+}
+
+function computeRequirementGap(facility, addon){
+  const staff = facility.staff;
+  const gap = { staffing_gap:0, process_gap:0, system_gap:0 };
+  for(const role in addon.requirement_staff){
+    const required = addon.requirement_staff[role];
+    const current = staff[role] ?? 0;
+    if(current < required) gap.staffing_gap += (required - current);
+  }
+  gap.process_gap = addon.requirement_process.length;
+  if(addon.requires_life_submission){
+    const lifeSupport = CARE_SOFTWARE_LIFE_SUPPORT[facility.care_software] ?? 0.3;
+    gap.system_gap = Math.round((1 - lifeSupport) * 100) / 100;
+  }
+  return gap;
+}
+
+function estimateAnnualRevenue(facility, addon){
+  const tu = totalUsers(facility.users) || 1;
+  let eligible;
+  if(addon.code === "NINCHISHOU_SENMON_I") eligible = tu * facility.users.dementia_ratio;
+  else if(addon.code === "NICHIJO_KEIZOKU") eligible = facility.users.care4 + facility.users.care5;
+  else eligible = tu;
+
+  const monthlyUnits = addon.unit_value * addon.monthly_frequency * eligible;
+  const monthlyYen = monthlyUnits * facility.unit_price;
+  return Math.round(monthlyYen * 12);
+}
+
+function estimateAnnualCost(facility, addon, gap){
+  let runningCost = 0;
+  const initialCost = addon.system_initial_cost;
+  if(gap.staffing_gap > 0 && addon.hiring_needed_role){
+    runningCost += addon.hiring_annual_cost * Math.min(gap.staffing_gap, 1.0);
+  }
+  runningCost += addon.training_annual_cost;
+  if(gap.system_gap > 0) runningCost += gap.system_gap * 100000;
+  return { initial_cost:initialCost, running_cost_annual:runningCost };
+}
+
+function computeDifficultyScore(gap){
+  return gap.staffing_gap*10.0 + gap.system_gap*3.0 + gap.process_gap*1.0;
+}
+
+function generateRoadmap(facility, addon, gap){
+  const steps = [];
+  let n = 1;
+  if(gap.staffing_gap > 0){
+    steps.push(`${n}. 【人員】${addon.hiring_needed_role || "必要職種"}を常勤換算 ${gap.staffing_gap.toFixed(2)} 名相当、新規雇用または外部連携で確保する。`);
+    n++;
+  }
+  for(const p of addon.requirement_process){ steps.push(`${n}. 【運用】${p}`); n++; }
+  if(addon.requires_life_submission){
+    const lifeSupport = CARE_SOFTWARE_LIFE_SUPPORT[facility.care_software] ?? 0.3;
+    let sysNote;
+    if(lifeSupport >= 0.8) sysNote = `${facility.care_software}はLIFE連携機能を標準搭載しているため、CSVエクスポート機能を有効化し運用フローに組み込むだけで対応可能。`;
+    else if(lifeSupport >= 0.5) sysNote = `${facility.care_software}はエクスポート対応済みだが、項目マッピングの手動調整が必要。導入時に代理店へ設定支援を依頼することを推奨。`;
+    else sysNote = `${facility.care_software}は現状LIFE連携が弱いため、LIFE専用の入力補助ツール導入または手入力運用の検討が必要。`;
+    steps.push(`${n}. 【システム】${sysNote}`); n++;
+  }
+  steps.push(`${n}. 【提出】都道府県・市町村へ加算算定に係る体制等状況一覧表を提出する。`);
+  return steps;
+}
+
+function analyze(facility){
+  const candidates = filterByService(facility);
+  const results = [];
+  for(const addon of candidates){
+    if(facility.current_addons.has(addon.code)) continue;
+    const gap = computeRequirementGap(facility, addon);
+    if(facility.near_miss_addons.has(addon.code)) gap.process_gap = Math.max(0, gap.process_gap - 1);
+
+    const revenue = estimateAnnualRevenue(facility, addon);
+    const cost = estimateAnnualCost(facility, addon, gap);
+    const amortizedInitial = cost.initial_cost / 5;
+    const netProfit = revenue - cost.running_cost_annual - amortizedInitial;
+    const difficulty = computeDifficultyScore(gap);
+    const roadmap = generateRoadmap(facility, addon, gap);
+
+    results.push({ addon, gap, annual_revenue:revenue, initial_cost:cost.initial_cost,
+      running_cost_annual:cost.running_cost_annual, net_annual_profit:netProfit,
+      difficulty_score:difficulty, roadmap });
+  }
+  return results;
+}
+
+function buildReport(facility, topN=5){
+  const results = analyze(facility);
+  const costEffectiveness = [...results].sort((a,b)=>b.net_annual_profit-a.net_annual_profit).slice(0, topN);
+  const easyCandidates = results.filter(r => r.gap.staffing_gap === 0);
+  const easeRank = [...easyCandidates].sort((a,b)=>a.difficulty_score-b.difficulty_score).slice(0, topN);
+  return { all:results, costEffectiveness, easeRank };
+}
+
+/* ---------------------------------------------------------------------
+ * 2. UI: フォーム初期化
+ * ------------------------------------------------------------------- */
+const $ = id => document.getElementById(id);
+
+function fillSelect(sel, items, selected){
+  sel.innerHTML = items.map(v => `<option value="${v}" ${v===selected?"selected":""}>${v}</option>`).join("");
+}
+
+function renderAddonChecklist(){
+  const serviceType = $("service_type").value;
+  const relevant = ADDON_MASTER.filter(a => a.applicable_services.includes(serviceType));
+  const list = $("addon-checklist");
+  if(relevant.length === 0){
+    list.innerHTML = `<p class="hint">このサービス類型に対応するサンプル加算がありません(マスタ拡張が必要です)。</p>`;
+    return;
+  }
+  list.innerHTML = relevant.map(a => `
+    <div class="addon-check" data-code="${a.code}">
+      <span class="nm">${a.name}</span>
+      <label><input type="checkbox" class="cur-addon" value="${a.code}"> 取得済み</label>
+      <label><input type="checkbox" class="near-addon" value="${a.code}"> ほぼ達成</label>
+    </div>
+  `).join("");
+}
+
+function collectFacility(){
+  const num = id => parseFloat($(id).value) || 0;
+  const currentAddons = new Set([...document.querySelectorAll(".cur-addon:checked")].map(el=>el.value));
+  const nearMissAddons = new Set([...document.querySelectorAll(".near-addon:checked")].map(el=>el.value));
+  const regionClass = $("region_class").value;
+
+  const facility = {
+    service_type: $("service_type").value,
+    staff: {
+      care_worker_ftv: num("care_worker_ftv"),
+      nurse_count: num("nurse_count"),
+      dietitian_count: num("dietitian_count"),
+      rehab_staff_count: num("rehab_staff_count"),
+      care_manager_count: num("care_manager_count"),
+      trained_dementia_staff: num("trained_dementia_staff"),
+    },
+    users: {
+      support1:num("support1"), support2:num("support2"),
+      care1:num("care1"), care2:num("care2"), care3:num("care3"), care4:num("care4"), care5:num("care5"),
+      dementia_ratio: num("dementia_ratio")/100, high_medical_need_ratio: num("high_medical_need_ratio")/100,
+    },
+    current_addons: currentAddons,
+    near_miss_addons: nearMissAddons,
+    care_software: $("care_software").value,
+    region_class: regionClass,
+    unit_price: REGION_UNIT_PRICE[regionClass] ?? 10.00,
+  };
+  return facility;
+}
+
+/* ---------------------------------------------------------------------
+ * 3. UI: 結果描画
+ * ------------------------------------------------------------------- */
+function yen(n){
+  const abs = Math.round(Math.abs(n)).toLocaleString("ja-JP");
+  return n < 0 ? `▲${abs}円` : `${abs}円`;
+}
+function profitSpan(n){
+  const cls = n < 0 ? "profit-neg" : "profit-pos";
+  const sign = n < 0 ? "▲" : "+";
+  return `<span class="${cls}">${sign}${Math.round(Math.abs(n)).toLocaleString("ja-JP")}円</span>`;
+}
+
+function renderResults(report){
+  const tbodyRoi = document.querySelector("#table-roi tbody");
+  tbodyRoi.innerHTML = report.costEffectiveness.map((r,i)=>`
+    <tr>
+      <td><span class="rank-badge">${i+1}</span></td>
+      <td>${r.addon.name}</td>
+      <td class="num">${yen(r.annual_revenue)}</td>
+      <td class="num">${yen(r.running_cost_annual + r.initial_cost/5)}</td>
+      <td class="num">${profitSpan(r.net_annual_profit)}</td>
+      <td>${r.net_annual_profit < 0 ? '<span class="pill warn">赤字注意</span>' : '<span class="pill ok">黒字</span>'}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="6">対象となる加算候補がありません。</td></tr>`;
+
+  const costList = $("cost-list");
+  if(report.all.length === 0){
+    costList.innerHTML = `<p class="section-note">対象となる加算候補がありません。業務形態・取得済み加算の設定をご確認ください。</p>`;
+  } else {
+    costList.innerHTML = `<div class="roadmap-list">` + report.all.map(r => `
+      <details class="roadmap-card">
+        <summary><span>${r.addon.name} &mdash; 初期${yen(r.initial_cost)} / 年間${yen(r.running_cost_annual)}</span><span class="arrow">▶</span></summary>
+        <ol>${r.roadmap.map(s=>`<li>${s}</li>`).join("")}</ol>
+      </details>
+    `).join("") + `</div>`;
+  }
+
+  const roadmapList = $("roadmap-list");
+  roadmapList.innerHTML = report.costEffectiveness.map((r,i) => `
+    <details class="roadmap-card" ${i===0?"open":""}>
+      <summary><span>${i+1}. ${r.addon.name}</span><span class="arrow">▶</span></summary>
+      <ol>${r.roadmap.map(s=>`<li>${s}</li>`).join("")}</ol>
+    </details>
+  `).join("") || `<p class="section-note">対象となる加算候補がありません。</p>`;
+
+  const tbodyEase = document.querySelector("#table-ease tbody");
+  const easeEmpty = $("ease-empty-note");
+  if(report.easeRank.length === 0){
+    tbodyEase.innerHTML = "";
+    easeEmpty.style.display = "block";
+  } else {
+    easeEmpty.style.display = "none";
+    tbodyEase.innerHTML = report.easeRank.map((r,i)=>`
+      <tr>
+        <td><span class="rank-badge">${i+1}</span></td>
+        <td>${r.addon.name}</td>
+        <td class="num">${r.difficulty_score.toFixed(1)}</td>
+        <td class="num">${profitSpan(r.net_annual_profit)}</td>
+      </tr>
+    `).join("");
+  }
+
+  $("empty-state").style.display = "none";
+  $("results").classList.add("show");
+}
+
+/* ---------------------------------------------------------------------
+ * 4. init
+ * ------------------------------------------------------------------- */
+fillSelect($("service_type"), SERVICE_TYPES, "通所介護");
+fillSelect($("region_class"), Object.keys(REGION_UNIT_PRICE), "2級地");
+fillSelect($("care_software"), Object.keys(CARE_SOFTWARE_LIFE_SUPPORT), "カイポケ");
+renderAddonChecklist();
+
+$("service_type").addEventListener("change", renderAddonChecklist);
+
+$("facility-form").addEventListener("submit", function(e){
+  e.preventDefault();
+  const facility = collectFacility();
+  const report = buildReport(facility, 5);
+  renderResults(report);
+  $("results-panel").scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+$("load-sample").addEventListener("click", function(){
+  $("service_type").value = "通所介護"; renderAddonChecklist();
+  $("region_class").value = "2級地";
+  $("care_software").value = "カイポケ";
+  $("care_worker_ftv").value = 6.0; $("nurse_count").value = 1.0;
+  $("dietitian_count").value = 0; $("rehab_staff_count").value = 0;
+  $("care_manager_count").value = 1.0; $("trained_dementia_staff").value = 1;
+  $("support1").value = 5; $("support2").value = 8;
+  $("care1").value = 10; $("care2").value = 12; $("care3").value = 6; $("care4").value = 3; $("care5").value = 1;
+  $("dementia_ratio").value = 35; $("high_medical_need_ratio").value = 5;
+  setTimeout(()=>{
+    const cur = document.querySelector('.cur-addon[value="SEISAN_TEISEI_KYOKA"]');
+    const near = document.querySelector('.near-addon[value="KOUKUEIYOU_SCREEN"]');
+    if(cur) cur.checked = true;
+    if(near) near.checked = true;
+  }, 0);
+});
+})();
+</script>
