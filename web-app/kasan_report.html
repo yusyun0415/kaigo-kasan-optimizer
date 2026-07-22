@@ -142,17 +142,34 @@ footer.doc-foot p{max-width:none;}
   .pipeline{flex-direction:column;}
   .pipe-step{border-top:none; border-left:2px solid var(--accent); padding-left:1rem;}
 }
+
+.term-btn{
+  background:none; border:none; padding:0; margin:0; font:inherit; color:inherit;
+  border-bottom:1px dotted var(--accent); cursor:help; display:inline;
+}
+.term-btn:hover, .term-btn:focus-visible{ color:var(--accent); }
+.term-tooltip{
+  position:fixed; max-width:320px; background:var(--paper); color:var(--ink);
+  border:1px solid var(--accent); border-radius:8px; padding:.75rem .95rem .8rem;
+  font-size:.82rem; line-height:1.65; box-shadow:0 8px 24px rgba(0,0,0,.22); z-index:999; display:none;
+}
+.term-tooltip.show{ display:block; }
+.term-tooltip .term-tooltip-title{ font-weight:700; color:var(--accent); margin:0 0 .3rem; display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; }
+.term-tooltip .term-tooltip-close{
+  position:absolute; top:.4rem; right:.5rem; background:none; border:none; color:var(--ink-soft);
+  font-size:.9rem; line-height:1; cursor:pointer; padding:.15rem;
+}
 </style>
 
 <div class="page">
   <div class="wrap">
     <div class="doc-head">
-      <p class="eyebrow">設計書 &middot; v1.0</p>
+      <p class="eyebrow">設計書 &middot; v2.0</p>
       <h1 class="title">介護報酬加算 最適化提案ロジック設計書</h1>
-      <p class="subtitle">施設の基本情報から、獲得可能な加算を費用対効果・獲得難易度の両面でランキングし、ロードマップ化するアルゴリズム仕様</p>
+      <p class="subtitle">施設の基本情報から、獲得可能な加算を費用対効果・獲得難易度の両面でランキングし、フェーズ構造のロードマップを生成するアルゴリズム仕様</p>
       <div class="meta-row">
         <span><b>対象改定基準</b>&ensp;令和6年度(2024年度)介護報酬改定</span>
-        <span><b>作成日</b>&ensp;2026-07-19</span>
+        <span><b>更新日</b>&ensp;2026-07-20(v2: コスト内訳・フェーズ型ロードマップを追加)</span>
         <span><b>参照実装</b>&ensp;kasan_engine.py (Python)</span>
       </div>
     </div>
@@ -198,7 +215,12 @@ footer.doc-foot p{max-width:none;}
       <p>ユーザーが入力する基本情報は5系統に分解する。<code class="inline">service_type</code>(業務形態)、<code class="inline">staff</code>(人員配置)、<code class="inline">users</code>(利用者構成)、<code class="inline">current_addons / near_miss_addons</code>(取得状況)、<code class="inline">care_software</code>(利用中システム)、<code class="inline">region_class</code>(地域区分=単価に影響)。</p>
 
       <h3>1.2 加算マスタスキーマ(AddonMaster)</h3>
-      <p>各加算は「単位数」「算定基準(月1回/回ごと/日ごと)」「必要人員」「必要な運用プロセス」「LIFE提出要否」「新規雇用が必要な職種とその人件費目安」「初期システム投資目安」を持つレコードとして定義する。これにより、加算ごとに個別ロジックを書かずに共通アルゴリズムで処理できる。</p>
+      <p>各加算は「単位数」「算定基準(月1回/回ごと/日ごと)」「必要人員」「LIFE提出要否」「新規雇用が必要な職種とその人件費目安」「初期システム投資目安」を持つレコードとして定義する。v2では以下2つのフィールドを拡張した。</p>
+      <ul>
+        <li><code class="inline">requirement_process</code> — 単純な文字列配列から、<code class="inline">{task, owner, frequency, deliverable}</code>(内容・担当・頻度・作成物)を持つ構造化レコードの配列に変更。ロードマップ(③)で「誰が・いつ・何を作るか」を明示できるようにした。</li>
+        <li><code class="inline">variable_cost_items</code>(新規) — 既存職員の稼働時間人件費・水道代・消耗品費など、新規雇用の有無に関わらず発生するランニングコストを<code class="inline">{label, basis, yen}</code>で保持。<code class="inline">basis</code>が<code class="inline">per_occurrence</code>なら算定回数×対象者数に比例、<code class="inline">per_month</code>なら対象者数に関わらず月一定額。</li>
+      </ul>
+      <p>これにより、加算ごとに個別ロジックを書かずに共通アルゴリズムで処理できる。</p>
 
       <h3>1.3 加算マスタ サンプルデータ(代表12件)</h3>
       <p>全加算(100件超)を網羅したものではなく、主要サービス類型の代表例。実運用時は同スキーマで全加算を登録する。</p>
@@ -245,17 +267,24 @@ footer.doc-foot p{max-width:none;}
       <h3>STEP 2 — 収益試算</h3>
       <p>年間収益 = 単位数 &times; 算定頻度(月換算) &times; 対象利用者数 &times; 地域区分単価(円/単位) &times; 12ヶ月。対象利用者数は加算の性質に応じて調整する(例: 認知症専門ケア加算は認知症該当割合のみを対象人数とする)。</p>
 
-      <h3>STEP 3 — コスト試算</h3>
-      <p>初期コスト(システム導入・改修費)とランニングコスト(新規雇用が真に必要な場合のみの人件費、研修費、システム非対応分の運用工数換算)を分けて算出する。<strong>既に要件を満たしている場合は追加費用ゼロと判定</strong>することが、現実的な費用対効果算出の鍵となる。</p>
+      <h3>STEP 3 — コスト試算(v2で拡張)</h3>
+      <p>v1では「新規雇用が必要な場合の人件費」しか計上しておらず、既存職員が対応できる加算のランニングコストが0円になってしまう問題があった(例: 入浴介助加算(II)で、実際には発生する介助人件費・水道代・消耗品費が抜けていた)。v2では加算ごとに<code class="inline">variable_cost_items</code>(既存職員の稼働時間人件費・水道代・消耗品費など)を費目単位で保持し、初期コスト・新規雇用人件費・研修費・システム対応工数・variable_cost_itemsを<strong>費目別の内訳付き</strong>で積み上げる。「既に要件を満たしている=追加費用ゼロ」という誤った前提を排除し、既存職員が対応する場合でも稼働時間・水道代・消耗品費は発生するという前提で算出することが、v2でのコスト試算の鍵となる。</p>
 
       <h3>STEP 4 — 費用対効果ランキング(①)</h3>
-      <p>年間純利益 = 年間収益 &minus; ランニングコスト &minus; (初期コスト&divide;5年償却)。この値の降順で上位3〜5件を提示し、<strong>赤字(純利益がマイナス)の場合は明示的に警告フラグを立てる。</strong></p>
+      <p>年間純利益 = 年間収益 &minus; ランニングコスト(費目別内訳の合計) &minus; (初期コスト&divide;5年償却)。この値の降順で上位3〜5件を提示し、<strong>赤字(純利益がマイナス)の場合は明示的に警告フラグを立てる。</strong></p>
 
       <h3>STEP 5 — 難易度評価(④の基礎)</h3>
-      <p>難易度スコア = 人員ギャップ&times;10 + システムギャップ&times;3 + 運用ギャップ&times;1。人員採用は解消に数ヶ月を要し裁量の余地が小さいため最重視し、書類・運用整備は裁量で解消しやすいため軽い重みとする。④のランキングは<strong>人員ギャップ=0の候補に限定した上で</strong>このスコアの昇順で並べる。</p>
+      <p>難易度スコア = 人員ギャップ&times;10 + システムギャップ&times;3 + 運用ギャップ&times;1。人員採用は解消に数ヶ月を要し裁量の余地が小さいため最重視し、書類・運用整備は裁量で解消しやすいため軽い重みとする。④のランキングは<strong>人員ギャップ=0の候補に限定した上で</strong>このスコアの昇順で並べる。難易度と費用対効果は別軸であり、難易度が低くても純利益がマイナスになる加算がある点は§3で具体例を示す。</p>
 
-      <h3>STEP 6 — ロードマップ生成(③)</h3>
-      <p>ギャップの内訳に応じて「人員確保 → 運用手続き → システム対応 → 都道府県への体制届出」の順でステップを組み立てる。システム対応ステップでは<code class="inline">care_software</code>のLIFE連携対応度を参照し、「設定変更のみで対応可」「手動マッピングが必要」「別ツール導入を検討」の3段階でアドバイスを出し分ける。</p>
+      <h3>STEP 6 — ロードマップ生成(③、v2でフェーズ構造化)</h3>
+      <p>v1は要件を一行ずつ列挙するだけで、誰が・いつ・何を作成するのかが不明確だった。v2では進め方が分かるように5フェーズに再編する。</p>
+      <ul>
+        <li><strong>Phase 1 人員体制の整備</strong> — 人員ギャップがある場合のみ。新規雇用/外部委託/既存職員の再配置のいずれかを提示し、想定リードタイムを明示。</li>
+        <li><strong>Phase 2 運用ルールの構築</strong> — 各運用タスクを<code class="inline">{task, owner, frequency, deliverable}</code>の構造で保持し、「誰が・どの頻度で・何を作成するか」を明示。</li>
+        <li><strong>Phase 3 システム・記録対応</strong> — LIFE提出が必要な加算のみ。<code class="inline">care_software</code>のLIFE連携対応度に応じ3段階でアドバイスを出し分ける。</li>
+        <li><strong>Phase 4 届出・算定開始</strong> — 提出書類・提出先・算定開始タイミングの目安を明示。</li>
+        <li><strong>Phase 5 継続運用・見直し</strong> — 記録の保存義務(原則5年)、要件を満たさなくなった場合の対応、報酬改定時の見直しを明示。算定して終わりではなく継続運用が必要であることを示す。</li>
+      </ul>
     </div>
   </section>
 
@@ -263,7 +292,7 @@ footer.doc-foot p{max-width:none;}
     <div class="wrap">
       <p class="kicker">3</p>
       <h2>出力フォーマットと計算例</h2>
-      <p>以下は参照実装のデモ用サンプル(通所介護・利用者45名・カイポケ利用・2級地)を手計算でトレースした結果。実行するとこの4種の出力が生成される。</p>
+      <p>以下は参照実装のデモ用サンプル(通所介護・利用者45名・カイポケ利用・2級地)をPython実行で確認した結果(v2: コスト内訳を含む)。実行するとこの4種の出力が生成される。</p>
 
       <h3>① 費用対効果ランキング(上位5件)</h3>
     </div>
@@ -272,32 +301,53 @@ footer.doc-foot p{max-width:none;}
         <table>
           <thead><tr><th></th><th>加算名</th><th class="num">年間増収見込み</th><th class="num">年間追加コスト</th><th class="num">年間純利益</th></tr></thead>
           <tbody>
-            <tr><td><span class="rank">1</span></td><td>入浴介助加算(II)</td><td class="num">5,944,752円</td><td class="num">0円</td><td class="num pos">+5,944,752円</td></tr>
-            <tr><td><span class="rank">2</span></td><td>個別機能訓練加算(I)ロ</td><td class="num">7,397,914円</td><td class="num">4,200,000円</td><td class="num pos">+3,197,914円</td></tr>
-            <tr><td><span class="rank">3</span></td><td>生活機能向上連携加算(I)</td><td class="num">600,480円</td><td class="num">0円</td><td class="num pos">+600,480円</td></tr>
-            <tr><td><span class="rank">4</span></td><td>科学的介護推進体制加算(I)</td><td class="num">240,192円</td><td class="num">70,000円</td><td class="num pos">+170,192円</td></tr>
-            <tr><td><span class="rank">5</span></td><td>口腔・栄養スクリーニング加算(I)</td><td class="num">120,096円</td><td class="num">0円</td><td class="num pos">+120,096円</td></tr>
+            <tr><td><span class="rank">1</span></td><td>個別機能訓練加算(I)ロ</td><td class="num">7,397,914円</td><td class="num">4,378,200円</td><td class="num pos">+3,019,714円</td></tr>
+            <tr><td><span class="rank">2</span></td><td>入浴介助加算(II)</td><td class="num">5,944,752円</td><td class="num">4,102,200円</td><td class="num pos">+1,842,552円</td></tr>
+            <tr><td><span class="rank">3</span></td><td>生活機能向上連携加算(I)</td><td class="num">600,480円</td><td class="num">243,000円</td><td class="num pos">+357,480円</td></tr>
+            <tr><td><span class="rank">4</span></td><td>科学的介護推進体制加算(I)</td><td class="num">240,192円</td><td class="num">113,200円</td><td class="num pos">+126,992円</td></tr>
+            <tr><td><span class="rank">5</span></td><td>口腔・栄養スクリーニング加算(I)</td><td class="num">120,096円</td><td class="num">10,800円</td><td class="num pos">+109,296円</td></tr>
           </tbody>
         </table>
       </div>
     </div>
     <div class="wrap">
       <div class="callout gold">
-        <span class="lbl">参考:負の費用対効果の例</span>
-        栄養アセスメント加算を得るために管理栄養士1名を新規雇用した場合、年間収益は約30万円にとどまる一方、人件費は約450万円かかるため、<strong class="neg">年間純利益は約 &minus;4,199,760円</strong>となり赤字判定となる。他事業所からの巡回・外部委託等で人員要件を満たせないか、先に検討すべき典型例。
+        <span class="lbl">入浴介助加算(II)のコスト内訳が示す教訓</span>
+        v1では「専門職の新規雇用が不要」という理由だけで年間追加コストを<strong>0円</strong>と算出していた(年間純利益 +5,944,752円)。実際には(1)個浴対応による追加介助人件費 年間2,916,000円、(2)水道・ガス代 年間583,200円、(3)洗浄剤・タオル等消耗品費 年間243,000円、(4)3ヶ月毎の居宅訪問アセスメント人件費 年間360,000円、計<strong>年間4,102,200円</strong>のランニングコストが発生する。v2ではこれらをvariable_cost_itemsとして明示的に計上し、年間純利益は<strong class="pos">+1,842,552円</strong>に補正された。「既存職員が対応できる=無償」ではないことを示す典型例。
       </div>
 
-      <h3>② コスト見積もり(抜粋)</h3>
-      <p>初期コストとランニングコストを候補全件について個別に提示する。人員ギャップがゼロの加算(サービス提供体制強化加算など)は初期・ランニングともに0円と算出され、書類・運用の微調整のみで着手できることが一目でわかる。</p>
+      <div class="callout">
+        <span class="lbl">参考:負の費用対効果の例</span>
+        栄養アセスメント加算を得るために管理栄養士1名を新規雇用した場合、年間収益は約30万円+アセスメント用品費に対し、人件費は約450万円かかるため、<strong class="neg">年間純利益は約 &minus;4,210,560円</strong>となり赤字判定となる。他事業所からの巡回・外部委託等で人員要件を満たせないか、先に検討すべき典型例。
+      </div>
 
-      <h3>③ 獲得ロードマップ(個別機能訓練加算(I)ロの例)</h3>
-      <ol>
-        <li>【人員】機能訓練指導員(PT/OT/ST等)を常勤換算 1.00 名相当、新規雇用または外部連携で確保する。</li>
-        <li>【運用】個別機能訓練計画書の作成</li>
-        <li>【運用】3ヶ月ごとの評価・見直し</li>
-        <li>【運用】生活機能向上を目的とした訓練の実施記録</li>
-        <li>【提出】都道府県・市町村へ加算算定に係る体制等状況一覧表を提出する。</li>
-      </ol>
+      <h3>② コスト見積もり(内訳付き・抜粋)</h3>
+      <p>初期コストとランニングコストを、費目(新規雇用人件費・研修費・LIFE対応工数・既存職員の稼働時間人件費・水道代・消耗品費など)ごとの内訳付きで候補全件に提示する。「人員ギャップがゼロ=追加コストもゼロ」という誤った前提を排除し、既存職員が対応する加算にも会議・記録・巡回等の稼働時間コストが計上される。</p>
+
+      <h3>③ 獲得ロードマップ(個別機能訓練加算(I)ロの例、Phase構造)</h3>
+      <p><strong>Phase 1: 人員体制の整備</strong>(想定リードタイム: 常勤・非常勤いずれも新規採用が必要。求人掲載から入職まで平均2〜3ヶ月を想定)</p>
+      <ul>
+        <li>機能訓練指導員(PT/OT/ST等)を常勤換算 1.00 名相当、新規雇用・外部委託・既存職員の再配置のいずれかで確保する。</li>
+      </ul>
+      <p><strong>Phase 2: 運用ルールの構築</strong></p>
+      <ul>
+        <li>個別機能訓練計画書の作成 — 担当: 機能訓練指導員 / 頻度: 利用開始時 / 作成物: 個別機能訓練計画書</li>
+        <li>目標達成度の評価・計画の見直し — 担当: 機能訓練指導員 / 頻度: 3ヶ月ごと / 作成物: 評価記録・改定後の計画書</li>
+        <li>生活機能向上を目的とした訓練の実施記録 — 担当: 機能訓練指導員/介護職員 / 頻度: 訓練実施の都度 / 作成物: 訓練実施記録</li>
+      </ul>
+      <p><strong>Phase 4: 届出・算定開始</strong></p>
+      <ul>
+        <li>体制等状況一覧表(様式は管轄自治体のホームページで公開)に必要事項を記入し、加算根拠となる計画書等の写しを添えて提出する。</li>
+        <li>提出先は事業所所在地を管轄する都道府県または市町村の介護保険担当課。</li>
+        <li>算定開始日は提出月の翌月1日からとする運用が一般的だが、詳細は自治体の運用に従うこと。</li>
+      </ul>
+      <p><strong>Phase 5: 継続運用・見直し</strong></p>
+      <ul>
+        <li>Phase 2で整備した記録を継続的に作成・保管する(指定基準上、原則5年間の保存義務)。</li>
+        <li>要件を満たさなくなった場合は速やかに算定を中止し、必要に応じて変更届を提出する。</li>
+        <li>報酬改定(3年ごと)・処遇改善加算等の毎年の運用見直しのタイミングで、本マスタの単位数・要件を再確認する。</li>
+      </ul>
+      <p style="font-size:.85rem; color:var(--ink-soft);">Phase 3(システム対応)は本加算ではLIFE提出が不要のため生成されない。要件がない場合はフェーズ自体を省略する設計。</p>
 
       <h3>④ 難易度が低い加算ランキング</h3>
       <p>人員ギャップがゼロの候補に限定し、難易度スコア昇順で並べる。</p>
@@ -307,16 +357,16 @@ footer.doc-foot p{max-width:none;}
         <table>
           <thead><tr><th></th><th>加算名</th><th class="num">難易度スコア</th><th class="num">年間純利益</th></tr></thead>
           <tbody>
-            <tr><td><span class="rank">1</span></td><td>口腔・栄養スクリーニング加算(I)</td><td class="num">1.0</td><td class="num pos">+120,096円</td></tr>
-            <tr><td><span class="rank">2</span></td><td>生活機能向上連携加算(I)</td><td class="num">2.0</td><td class="num pos">+600,480円</td></tr>
-            <tr><td><span class="rank">3</span></td><td>科学的介護推進体制加算(I)</td><td class="num">2.6</td><td class="num pos">+170,192円</td></tr>
-            <tr><td><span class="rank">4</span></td><td>認知症専門ケア加算(I)</td><td class="num">3.0</td><td class="num neg">&minus;11,289円</td></tr>
+            <tr><td><span class="rank">1</span></td><td>口腔・栄養スクリーニング加算(I)</td><td class="num">1.0</td><td class="num pos">+109,296円</td></tr>
+            <tr><td><span class="rank">2</span></td><td>科学的介護推進体制加算(I)</td><td class="num">2.6</td><td class="num pos">+126,992円</td></tr>
+            <tr><td><span class="rank">3</span></td><td>認知症専門ケア加算(I)</td><td class="num">3.0</td><td class="num neg">&minus;76,089円</td></tr>
+            <tr><td><span class="rank">4</span></td><td>生活機能向上連携加算(I)</td><td class="num">3.0</td><td class="num pos">+357,480円</td></tr>
           </tbody>
         </table>
       </div>
     </div>
     <div class="wrap">
-      <p style="margin-top:1rem;">4位の認知症専門ケア加算(I)は人員要件を既に満たしており着手は容易だが、研修費用が収益をわずかに上回り純利益はマイナスとなる。<strong>「取りやすい」と「儲かる」は必ずしも一致しない</strong>ことを示す好例であり、④のランキングと①のランキングを必ず併記する設計上の理由でもある。</p>
+      <p style="margin-top:1rem;">3位の認知症専門ケア加算(I)は人員要件を既に満たしており着手は容易だが、認知症ケア会議の人件費(月1回・3名×1時間)と研修費用が収益をわずかに上回り、純利益はマイナスとなる。<strong>「取りやすい」と「儲かる」は必ずしも一致しない</strong>ことを示す好例であり、④のランキングと①のランキングを必ず併記する設計上の理由でもある。</p>
     </div>
   </section>
 
@@ -325,6 +375,10 @@ footer.doc-foot p{max-width:none;}
       <p class="kicker">4</p>
       <h2>参照実装(Python)</h2>
       <p>上記ロジックをそのまま実行可能な形にしたコード。加算マスタ(<code class="inline">ADDON_MASTER</code>)を差し替えるだけで全サービス類型・全加算に拡張できる構造にしている。</p>
+      <div class="callout gold">
+        <span class="lbl">この下のコードはv1相当の抜粋(構成説明用)</span>
+        全文・最新版(コスト内訳<code class="inline">cost_breakdown</code>とフェーズ構造ロードマップを含むv2)は、リポジトリの <code class="inline">python-engine/kasan_engine.py</code> を参照。差分の要点は <code class="inline">estimate_annual_cost()</code> が<code class="inline">variable_cost_items</code>を費目別に積み上げて返すようになったこと、<code class="inline">generate_roadmap()</code> がPhase 1〜5のリストを返すようになったこと。
+      </div>
     </div>
     <div class="wide">
       <div class="code-panel">
@@ -665,3 +719,115 @@ def build_report(facility: FacilityInput, top_n: int = 5) -> dict:
     </footer>
   </section>
 </div>
+
+<script>
+(function(){
+"use strict";
+const GLOSSARY = {
+  "常勤換算": "職員の勤務時間を「常勤(フルタイム)の職員が何人分に相当するか」に換算した数値です。例:週20時間勤務のパート2名なら、常勤換算で約1.0名相当になります。",
+  "地域区分": "人件費等の地域差を反映するため、介護報酬の単価(1単位あたりの金額)を地域ごとに調整する区分です。1級地が最も単価が高く、「その他」が最も低くなります。",
+  "認知症自立度": "認知症の症状によって日常生活にどの程度支障が出ているかを表す「認知症高齢者の日常生活自立度」という指標です。IIIランク以上は、日中を中心に頻繁な介護が必要な状態を指します。",
+  "医療依存度": "たんの吸引や経管栄養など、医療的なケアがどの程度必要かを示す度合いです。度合いが高いほど、看護師等による医療的な対応が頻繁に必要になります。",
+  "PT/OT/ST": "理学療法士(PT)・作業療法士(OT)・言語聴覚士(ST)の略称です。いずれもリハビリテーションの専門職です。",
+  "LIFE": "科学的介護情報システムの略称です。介護記録データを厚生労働省に提出し、分析結果のフィードバックを受け取る国の仕組みです。",
+  "PDCA": "Plan(計画)→Do(実行)→Check(評価)→Action(改善)を繰り返し、ケアの質を継続的に見直していく進め方のことです。",
+  "個浴": "浴槽で複数人が入る「機械浴」等ではなく、利用者一人ひとりに合わせて個別に入浴介助を行う方式のことです。",
+  "機能訓練指導員": "理学療法士・作業療法士・言語聴覚士・看護師等のうち、身体機能の維持・向上のための訓練(個別機能訓練)を行う担当者として配置される職種です。",
+  "生活相談員": "利用者や家族からの相談対応、他機関との連絡調整などを行う、通所介護・施設サービス等に配置される職種です。",
+  "サービス提供責任者": "訪問介護事業所で、訪問介護計画の作成やヘルパーへの指示・指導を行う責任者です。",
+  "体制等状況一覧表": "加算を算定するために、人員配置や実施体制の状況を自治体へ報告するための届出書類です。様式は各都道府県・市町村のホームページで公開されています。",
+  "変更届": "人員体制やサービス内容など、指定申請時の内容に変更があった場合に自治体へ提出する届出書類です。",
+  "指定基準": "介護保険サービスを提供する事業所が満たすべき、人員配置や設備、運営方法に関する国の基準です。",
+  "オンコール": "勤務時間外でも利用者からの緊急連絡に対応できるよう、職員が電話等で待機する体制のことです。",
+  "訪問リハ": "訪問リハビリテーションの略称です。理学療法士等が利用者の自宅を訪問してリハビリを行うサービスです。",
+  "加算率": "基本の介護報酬(総単位数)に対して、決められた割合(%)を上乗せする加算の算定方式です。",
+  "難易度スコア": "人員体制・システム対応・書類作業の3つの不足度を重み付けして合計した、このツール独自の指標です。数値が低いほど、少ない労力で要件を満たせることを示します(値そのものに単位はありません)。",
+  "ランニングコスト": "加算を維持していくために、毎年・毎月継続的に発生するコストのことです(人件費・水道代・消耗品費など)。一度だけ発生する初期コストとは区別します。",
+  "5年償却": "初期投資額を1年分の費用として計上せず、使用期間(ここでは5年)で均等に分けて毎年の費用として計算する会計上の考え方です。",
+  "介護福祉士": "介護に関する国家資格を持つ専門職です。事業所内の介護福祉士の配置割合が、一部の加算の算定要件になります。",
+  "認知症介護実践リーダー研修": "認知症ケアのリーダーとして必要な知識・技術を学ぶ、都道府県等が実施する研修です。修了者の配置が一部の加算の要件になります。",
+  "variable_cost_items": "既存職員の稼働時間人件費・水道代・消耗品費など、新規雇用の有無に関わらず発生するランニングコストを保持するデータ項目です(§1.2参照)。",
+};
+
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+const GLOSSARY_REGEX = new RegExp("(" + Object.keys(GLOSSARY).sort((a,b)=>b.length-a.length).map(escapeRegExp).join("|") + ")");
+
+function linkifyElement(root){
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      const p = node.parentElement;
+      if(!p || p.closest("script, style, code, pre, .term-btn, .term-tooltip")) return NodeFilter.FILTER_REJECT;
+      return GLOSSARY_REGEX.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const targets = [];
+  let n;
+  while((n = walker.nextNode())) targets.push(n);
+  for(const textNode of targets){
+    const parts = textNode.nodeValue.split(GLOSSARY_REGEX);
+    if(parts.length <= 1) continue;
+    const frag = document.createDocumentFragment();
+    parts.forEach(part => {
+      if(Object.prototype.hasOwnProperty.call(GLOSSARY, part)){
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "term-btn";
+        btn.dataset.term = part;
+        btn.setAttribute("aria-haspopup", "true");
+        btn.setAttribute("aria-expanded", "false");
+        btn.textContent = part;
+        frag.appendChild(btn);
+      } else if(part){
+        frag.appendChild(document.createTextNode(part));
+      }
+    });
+    textNode.parentNode.replaceChild(frag, textNode);
+  }
+}
+
+const termTooltip = document.createElement("div");
+termTooltip.className = "term-tooltip";
+termTooltip.setAttribute("role", "tooltip");
+document.body.appendChild(termTooltip);
+let activeTermBtn = null;
+
+function hideTermTooltip(){
+  termTooltip.classList.remove("show");
+  if(activeTermBtn) activeTermBtn.setAttribute("aria-expanded", "false");
+  activeTermBtn = null;
+}
+function showTermTooltip(btn){
+  const term = btn.dataset.term;
+  const def = GLOSSARY[term];
+  if(!def) return;
+  termTooltip.innerHTML = `<button type="button" class="term-tooltip-close" aria-label="閉じる">&times;</button><span class="term-tooltip-title">${term}</span>${def}`;
+  termTooltip.classList.add("show");
+  const r = btn.getBoundingClientRect();
+  const tw = termTooltip.offsetWidth, th = termTooltip.offsetHeight;
+  let left = Math.min(Math.max(r.left, 12), window.innerWidth - tw - 12);
+  let top = r.bottom + 8;
+  if(top + th > window.innerHeight - 12) top = r.top - th - 8;
+  termTooltip.style.left = left + "px";
+  termTooltip.style.top = top + "px";
+  btn.setAttribute("aria-expanded", "true");
+  activeTermBtn = btn;
+}
+document.addEventListener("click", function(e){
+  const closeBtn = e.target.closest(".term-tooltip-close");
+  if(closeBtn){ hideTermTooltip(); return; }
+  const btn = e.target.closest(".term-btn");
+  if(btn){
+    if(activeTermBtn === btn) hideTermTooltip();
+    else showTermTooltip(btn);
+    return;
+  }
+  if(!e.target.closest(".term-tooltip")) hideTermTooltip();
+});
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") hideTermTooltip(); });
+window.addEventListener("scroll", hideTermTooltip, {passive:true});
+window.addEventListener("resize", hideTermTooltip);
+
+linkifyElement(document.body);
+})();
+</script>

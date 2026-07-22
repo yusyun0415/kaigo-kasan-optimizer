@@ -38,19 +38,18 @@ body{margin:0;}
 .page{background:var(--paper); color:var(--ink); font-family:var(--font-body); line-height:1.7; font-size:15.5px;}
 .shell{max-width:1180px;margin:0 auto;padding:2.4rem 1.5rem 5rem;}
 
-/* header */
 header.top{padding-bottom:1.6rem; border-bottom:1px solid var(--line); margin-bottom:1.8rem;}
 .eyebrow{font-size:.76rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 .5rem;}
 h1{font-family:var(--font-display); font-weight:600; font-size:1.75rem; margin:0 0 .5rem; text-wrap:balance;}
 .lede{color:var(--ink-soft); margin:0 0 1.1rem; max-width:62ch; text-wrap:balance;}
 .callout{border-left:3px solid var(--danger); background:var(--danger-soft); padding:.8rem 1.1rem; border-radius:2px; font-size:.85rem; max-width:74ch;}
 .callout b{color:var(--danger);}
+.callout.gold{border-left-color:var(--gold); background:var(--gold-soft);}
+.callout.gold b{color:var(--gold);}
 
-/* layout */
 .grid{display:grid; grid-template-columns:minmax(340px,420px) 1fr; gap:1.8rem; align-items:start;}
 @media (max-width:960px){ .grid{grid-template-columns:1fr;} }
 
-/* panels */
 .panel{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:1.5rem 1.5rem 1.7rem;}
 .panel + .panel{margin-top:1.2rem;}
 fieldset{border:none; margin:0 0 1.5rem; padding:0;}
@@ -87,7 +86,6 @@ button.primary:hover{filter:brightness(1.08);}
 button.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
 button.ghost:hover{border-color:var(--accent); color:var(--accent);}
 
-/* results */
 .empty-state{display:flex; align-items:center; justify-content:center; min-height:380px; color:var(--ink-soft); font-size:.92rem; text-align:center; padding:2rem;}
 .results{display:none;}
 .results.show{display:block;}
@@ -113,61 +111,81 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
 .profit-pos{color:var(--accent); font-weight:700;}
 .profit-neg{color:var(--danger); font-weight:700;}
 
-.roadmap-list{display:grid; gap:.7rem; margin-bottom:1.6rem;}
-.roadmap-card{border:1px solid var(--line); border-radius:6px; background:var(--input-bg);}
-.roadmap-card summary{
+.card-list{display:grid; gap:.7rem; margin-bottom:1.6rem;}
+.acc-card{border:1px solid var(--line); border-radius:6px; background:var(--input-bg);}
+.acc-card summary{
   list-style:none; cursor:pointer; padding:.85rem 1rem; display:flex; justify-content:space-between;
   align-items:center; gap:.8rem; font-size:.9rem; font-weight:700;
 }
-.roadmap-card summary::-webkit-details-marker{display:none;}
-.roadmap-card summary .arrow{color:var(--ink-soft); font-size:.8rem; transition:transform .15s ease;}
-.roadmap-card[open] summary .arrow{transform:rotate(90deg);}
-.roadmap-card ol{margin:0; padding:0 1.3rem 1rem 1.6rem; font-size:.84rem;}
-.roadmap-card li{margin-bottom:.45rem;}
-.roadmap-card li:last-child{margin-bottom:0;}
+.acc-card summary::-webkit-details-marker{display:none;}
+.acc-card summary .arrow{color:var(--ink-soft); font-size:.8rem; transition:transform .15s ease; flex-shrink:0;}
+.acc-card[open] summary .arrow{transform:rotate(90deg);}
+.acc-card .acc-body{padding:0 1.1rem 1.1rem;}
+
+.cost-line{display:flex; justify-content:space-between; gap:1rem; padding:.35rem 0; border-bottom:1px dashed var(--line); font-size:.82rem;}
+.cost-line:last-child{border-bottom:none;}
+.cost-line .amt{font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--ink-soft);}
+.cost-total{display:flex; justify-content:space-between; padding-top:.5rem; margin-top:.3rem; border-top:1px solid var(--line); font-weight:700; font-size:.86rem;}
+
+.phase-block{margin-bottom:1.1rem;}
+.phase-block:last-child{margin-bottom:0;}
+.phase-name{font-weight:700; font-size:.84rem; color:var(--accent); margin:0 0 .4rem; display:flex; align-items:center; gap:.5rem;}
+.phase-leadtime{font-size:.76rem; color:var(--ink-soft); background:var(--gold-soft); border-left:2px solid var(--gold); padding:.4rem .6rem; margin-bottom:.5rem; border-radius:2px;}
+.phase-plain-item{font-size:.82rem; margin-bottom:.4rem; padding-left:.9rem; border-left:2px solid var(--line);}
+.process-item{border-left:2px solid var(--line); padding-left:.8rem; margin-bottom:.6rem;}
+.process-item .task{font-weight:700; font-size:.84rem;}
+.process-item .meta{display:flex; gap:.9rem; flex-wrap:wrap; font-size:.72rem; color:var(--ink-soft); margin-top:.3rem;}
+.process-item .meta b{color:var(--ink); font-weight:600;}
 
 .result-block{margin-bottom:2.4rem;}
 .result-block:last-child{margin-bottom:0;}
 .small-note{font-size:.78rem; color:var(--ink-soft); margin-top:.6rem;}
 
 @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+
+.term-btn{
+  background:none; border:none; padding:0; margin:0; font:inherit; color:inherit;
+  border-bottom:1px dotted var(--accent); cursor:help; display:inline;
+}
+.term-btn:hover, .term-btn:focus-visible{ color:var(--accent); }
+.term-tooltip{
+  position:fixed; max-width:320px; background:var(--panel); color:var(--ink);
+  border:1px solid var(--accent); border-radius:8px; padding:.75rem .95rem .8rem;
+  font-size:.8rem; line-height:1.65; box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:999; display:none;
+}
+.term-tooltip.show{ display:block; }
+.term-tooltip .term-tooltip-title{ font-weight:700; color:var(--accent); margin:0 0 .3rem; display:block; font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; }
+.term-tooltip .term-tooltip-close{
+  position:absolute; top:.4rem; right:.5rem; background:none; border:none; color:var(--ink-soft);
+  font-size:.9rem; line-height:1; cursor:pointer; padding:.15rem;
+}
 </style>
 
 <div class="page">
   <div class="shell">
     <header class="top">
-      <p class="eyebrow">Interactive Tool</p>
+      <p class="eyebrow">Interactive Tool &middot; v2</p>
       <h1>介護報酬加算 最適化提案ツール</h1>
-      <p class="lede">施設の基本情報を入力すると、その場で費用対効果ランキング・コスト見積もり・獲得ロードマップ・難易度ランキングを算出します。</p>
+      <p class="lede">施設の基本情報を入力すると、その場で費用対効果ランキング・コスト見積もり(内訳付き)・獲得ロードマップ・難易度ランキングを算出します。</p>
       <div class="callout">
-        <b>注意:</b> 単位数・人件費・システム費用はロジック提示用の代表値です。実際の算定判断には最新の告示・単価表での確認が必要です。マスタは代表12加算のみ収録(全加算網羅ではありません)。
+        <b>注意:</b> 単位数・人件費・水道代等の費目はロジック提示用の代表値です。実際の算定判断には最新の告示・単価表、自事業所の実際の人件費率での確認が必要です。マスタは代表12加算のみ収録(全加算網羅ではありません)。
       </div>
     </header>
 
     <div class="grid">
-      <!-- LEFT: FORM -->
       <div>
         <form id="facility-form">
           <div class="panel">
             <fieldset>
               <legend>A. 業務形態</legend>
               <div class="field-row single">
-                <div>
-                  <label for="service_type">サービス類型</label>
-                  <select id="service_type" name="service_type"></select>
-                </div>
+                <div><label for="service_type">サービス類型</label><select id="service_type" name="service_type"></select></div>
               </div>
               <div class="field-row single">
-                <div>
-                  <label for="region_class">地域区分</label>
-                  <select id="region_class" name="region_class"></select>
-                </div>
+                <div><label for="region_class">地域区分</label><select id="region_class" name="region_class"></select></div>
               </div>
               <div class="field-row single">
-                <div>
-                  <label for="care_software">利用中の業務システム</label>
-                  <select id="care_software" name="care_software"></select>
-                </div>
+                <div><label for="care_software">利用中の業務システム</label><select id="care_software" name="care_software"></select></div>
               </div>
             </fieldset>
 
@@ -188,7 +206,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
             </fieldset>
 
             <fieldset>
-              <legend>C. 利用者ステータス(人数)</legend>
+              <legend>C. 利用者ステータス(人数) <button type="button" class="term-btn" data-term="介護度" aria-haspopup="true" aria-expanded="false">要介護度とは</button></legend>
               <div class="field-row">
                 <div><label for="support1">要支援1</label><input type="number" min="0" step="1" id="support1" value="5"></div>
                 <div><label for="support2">要支援2</label><input type="number" min="0" step="1" id="support2" value="8"></div>
@@ -227,32 +245,33 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
         </form>
       </div>
 
-      <!-- RIGHT: RESULTS -->
       <div>
         <div class="panel" id="results-panel">
           <div class="empty-state" id="empty-state">左のフォームに施設情報を入力し「分析する」を押すと、<br>ここに①〜④の分析結果が表示されます。</div>
           <div class="results" id="results">
             <div class="result-block">
               <div class="section-title"><span class="mark">①</span><h2>費用対効果ランキング(上位5件)</h2></div>
-              <p class="section-note">年間純利益(想定収益&minus;想定追加コスト)が高い順。赤字が見込まれる場合は警告を表示します。</p>
+              <p class="section-note">年間純利益(想定収益&minus;想定追加コスト)が高い順。既存職員の稼働時間・水道代・消耗品費もコストに含めて算出しています。</p>
               <div class="table-scroll"><table id="table-roi"><thead><tr><th></th><th>加算名</th><th class="num">年間増収見込み</th><th class="num">年間追加コスト</th><th class="num">年間純利益</th><th>判定</th></tr></thead><tbody></tbody></table></div>
+              <p class="small-note" style="margin-top:.9rem;">加算ごとの「年間増収見込み」の算出根拠(単位数・算定回数・対象利用者数・地域区分単価)は下の各カードを開くと確認できます。</p>
+              <div id="revenue-detail-list" class="card-list" style="margin-top:.6rem;"></div>
             </div>
 
             <div class="result-block">
-              <div class="section-title"><span class="mark">②</span><h2>コスト見積もり(候補全件)</h2></div>
-              <p class="section-note">初期コストとランニングコスト(年間)の内訳。行を開くと獲得手順も確認できます。</p>
-              <div id="cost-list"></div>
+              <div class="section-title"><span class="mark">②</span><h2>コスト見積もり(内訳付き・候補全件)</h2></div>
+              <p class="section-note">行を開くと、人件費・研修費・水道代・消耗品費などの費目別内訳が確認できます。</p>
+              <div id="cost-list" class="card-list"></div>
             </div>
 
             <div class="result-block">
               <div class="section-title"><span class="mark">③</span><h2>獲得ロードマップ(①上位5件)</h2></div>
-              <p class="section-note">要件クリアの手順を、人員確保→運用整備→システム対応→届出の順で提示します。</p>
-              <div class="roadmap-list" id="roadmap-list"></div>
+              <p class="section-note">Phase 1(人員体制)→Phase 2(運用ルール・担当者/頻度/作成物)→Phase 3(システム対応)→Phase 4(届出)→Phase 5(継続運用)の順で構成しています。</p>
+              <div class="card-list" id="roadmap-list"></div>
             </div>
 
             <div class="result-block">
               <div class="section-title"><span class="mark">④</span><h2>難易度が低い加算ランキング</h2></div>
-              <p class="section-note">人員の新規採用がほぼ不要な候補に限定し、難易度スコア(低いほど容易)昇順で表示します。</p>
+              <p class="section-note">人員の新規採用がほぼ不要な候補に限定し、難易度スコア(低いほど容易)昇順で表示します。「取りやすい」が「儲かる」を意味しない点にも注意してください。</p>
               <div class="table-scroll"><table id="table-ease"><thead><tr><th></th><th>加算名</th><th class="num">難易度スコア</th><th class="num">年間純利益</th></tr></thead><tbody></tbody></table></div>
               <p class="small-note" id="ease-empty-note" style="display:none;">人員ギャップがゼロの候補が現在ありません。まずは①③で人員確保の要否をご確認ください。</p>
             </div>
@@ -268,6 +287,116 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
 "use strict";
 
 /* ---------------------------------------------------------------------
+ * -1. 用語集(クリックで説明を表示する専門用語)
+ * ------------------------------------------------------------------- */
+const GLOSSARY = {
+  "常勤換算": "職員の勤務時間を「常勤(フルタイム)の職員が何人分に相当するか」に換算した数値です。例:週20時間勤務のパート2名なら、常勤換算で約1.0名相当になります。",
+  "地域区分": "人件費等の地域差を反映するため、介護報酬の単価(1単位あたりの金額)を地域ごとに調整する区分です。1級地が最も単価が高く、「その他」が最も低くなります。",
+  "認知症自立度": "認知症の症状によって日常生活にどの程度支障が出ているかを表す「認知症高齢者の日常生活自立度」という指標です。IIIランク以上は、日中を中心に頻繁な介護が必要な状態を指します。",
+  "医療依存度": "たんの吸引や経管栄養など、医療的なケアがどの程度必要かを示す度合いです。度合いが高いほど、看護師等による医療的な対応が頻繁に必要になります。",
+  "PT/OT/ST": "理学療法士(PT)・作業療法士(OT)・言語聴覚士(ST)の略称です。いずれもリハビリテーションの専門職です。",
+  "LIFE": "科学的介護情報システムの略称です。介護記録データを厚生労働省に提出し、分析結果のフィードバックを受け取る国の仕組みです。",
+  "PDCA": "Plan(計画)→Do(実行)→Check(評価)→Action(改善)を繰り返し、ケアの質を継続的に見直していく進め方のことです。",
+  "個浴": "浴槽で複数人が入る「機械浴」等ではなく、利用者一人ひとりに合わせて個別に入浴介助を行う方式のことです。",
+  "機能訓練指導員": "理学療法士・作業療法士・言語聴覚士・看護師等のうち、身体機能の維持・向上のための訓練(個別機能訓練)を行う担当者として配置される職種です。",
+  "生活相談員": "利用者や家族からの相談対応、他機関との連絡調整などを行う、通所介護・施設サービス等に配置される職種です。",
+  "サービス提供責任者": "訪問介護事業所で、訪問介護計画の作成やヘルパーへの指示・指導を行う責任者です。",
+  "体制等状況一覧表": "加算を算定するために、人員配置や実施体制の状況を自治体へ報告するための届出書類です。様式は各都道府県・市町村のホームページで公開されています。",
+  "変更届": "人員体制やサービス内容など、指定申請時の内容に変更があった場合に自治体へ提出する届出書類です。",
+  "指定基準": "介護保険サービスを提供する事業所が満たすべき、人員配置や設備、運営方法に関する国の基準です。",
+  "オンコール": "勤務時間外でも利用者からの緊急連絡に対応できるよう、職員が電話等で待機する体制のことです。",
+  "訪問リハ": "訪問リハビリテーションの略称です。理学療法士等が利用者の自宅を訪問してリハビリを行うサービスです。",
+  "加算率": "基本の介護報酬(総単位数)に対して、決められた割合(%)を上乗せする加算の算定方式です。",
+  "難易度スコア": "人員体制・システム対応・書類作業の3つの不足度を重み付けして合計した、このツール独自の指標です。数値が低いほど、少ない労力で要件を満たせることを示します(値そのものに単位はありません)。",
+  "ランニングコスト": "加算を維持していくために、毎年・毎月継続的に発生するコストのことです(人件費・水道代・消耗品費など)。一度だけ発生する初期コストとは区別します。",
+  "5年償却": "初期投資額を1年分の費用として計上せず、使用期間(ここでは5年)で均等に分けて毎年の費用として計算する会計上の考え方です。",
+  "介護福祉士": "介護に関する国家資格を持つ専門職です。事業所内の介護福祉士の配置割合が、一部の加算の算定要件になります。",
+  "認知症介護実践リーダー研修": "認知症ケアのリーダーとして必要な知識・技術を学ぶ、都道府県等が実施する研修です。修了者の配置が一部の加算の要件になります。",
+  "介護度": "要支援1・2、要介護1〜5の7段階で、支援・介護がどれくらい必要かを示す介護保険の認定区分です。数字が大きいほど介護の必要度が高い状態を示します。",
+};
+
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+const GLOSSARY_REGEX = new RegExp("(" + Object.keys(GLOSSARY).sort((a,b)=>b.length-a.length).map(escapeRegExp).join("|") + ")");
+
+function linkifyElement(root){
+  if(!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      const p = node.parentElement;
+      if(!p || p.closest("script, style, select, option, .term-btn, .term-tooltip")) return NodeFilter.FILTER_REJECT;
+      return GLOSSARY_REGEX.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const targets = [];
+  let n;
+  while((n = walker.nextNode())) targets.push(n);
+
+  for(const textNode of targets){
+    const parts = textNode.nodeValue.split(GLOSSARY_REGEX);
+    if(parts.length <= 1) continue;
+    const frag = document.createDocumentFragment();
+    parts.forEach(part => {
+      if(Object.prototype.hasOwnProperty.call(GLOSSARY, part)){
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "term-btn";
+        btn.dataset.term = part;
+        btn.setAttribute("aria-haspopup", "true");
+        btn.setAttribute("aria-expanded", "false");
+        btn.textContent = part;
+        frag.appendChild(btn);
+      } else if(part){
+        frag.appendChild(document.createTextNode(part));
+      }
+    });
+    textNode.parentNode.replaceChild(frag, textNode);
+  }
+}
+
+const termTooltip = document.createElement("div");
+termTooltip.className = "term-tooltip";
+termTooltip.setAttribute("role", "tooltip");
+document.body.appendChild(termTooltip);
+let activeTermBtn = null;
+
+function hideTermTooltip(){
+  termTooltip.classList.remove("show");
+  if(activeTermBtn) activeTermBtn.setAttribute("aria-expanded", "false");
+  activeTermBtn = null;
+}
+function showTermTooltip(btn){
+  const term = btn.dataset.term;
+  const def = GLOSSARY[term];
+  if(!def) return;
+  termTooltip.innerHTML = `<button type="button" class="term-tooltip-close" aria-label="閉じる">&times;</button><span class="term-tooltip-title">${term}</span>${def}`;
+  termTooltip.classList.add("show");
+  const r = btn.getBoundingClientRect();
+  const tw = termTooltip.offsetWidth, th = termTooltip.offsetHeight;
+  let left = Math.min(Math.max(r.left, 12), window.innerWidth - tw - 12);
+  let top = r.bottom + 8;
+  if(top + th > window.innerHeight - 12) top = r.top - th - 8;
+  termTooltip.style.left = left + "px";
+  termTooltip.style.top = top + "px";
+  btn.setAttribute("aria-expanded", "true");
+  activeTermBtn = btn;
+}
+document.addEventListener("click", function(e){
+  const closeBtn = e.target.closest(".term-tooltip-close");
+  if(closeBtn){ hideTermTooltip(); return; }
+  const btn = e.target.closest(".term-btn");
+  if(btn){
+    if(activeTermBtn === btn) hideTermTooltip();
+    else showTermTooltip(btn);
+    return;
+  }
+  if(!e.target.closest(".term-tooltip")) hideTermTooltip();
+});
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") hideTermTooltip(); });
+window.addEventListener("scroll", hideTermTooltip, {passive:true});
+window.addEventListener("resize", hideTermTooltip);
+
+/* ---------------------------------------------------------------------
  * 0. マスタ定数
  * ------------------------------------------------------------------- */
 const REGION_UNIT_PRICE = {
@@ -279,94 +408,176 @@ const CARE_SOFTWARE_LIFE_SUPPORT = {
 };
 const SERVICE_TYPES = ["通所介護","訪問介護","訪問看護","特別養護老人ホーム","介護老人保健施設","通所リハビリテーション","グループホーム"];
 
+/* 各加算の requirement_process は {task, owner, frequency, deliverable} の配列。
+   variable_cost_items は既存職員の稼働時間・水道代・消耗品費等を表す
+   {label, basis:"per_occurrence"|"per_month", yen} の配列。 */
 const ADDON_MASTER = [
   { code:"LIFE_KAGAKUTEKI", name:"科学的介護推進体制加算(I)",
     applicable_services:["通所介護","訪問看護","特別養護老人ホーム","介護老人保健施設","通所リハビリテーション"],
     unit_value:40, billing_basis:"per_month", monthly_frequency:1,
-    requirement_staff:{}, requirement_process:["利用者ごとのADL・栄養・口腔等の情報をLIFEへ提出","フィードバックを踏まえたケア計画の見直し(PDCA)"],
+    requirement_staff:{},
+    requirement_process:[
+      {task:"利用者ごとのADL・栄養・口腔等の情報をLIFEへ提出", owner:"介護職員/相談員(データ入力)", frequency:"利用開始時および3ヶ月に1回", deliverable:"LIFE提出用データ(CSV等)"},
+      {task:"LIFEからのフィードバックを踏まえたケア計画の見直し(PDCA)", owner:"サービス提供責任者・生活相談員", frequency:"フィードバック受領後1ヶ月以内", deliverable:"見直し後のケア計画書"},
+    ],
+    variable_cost_items:[{label:"LIFEデータ入力・PDCA会議の人件費(月2時間相当)", basis:"per_month", yen:3600}],
     requires_life_submission:true, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:50000, system_initial_cost:0,
-    notes:"人員要件なし。既存ソフトのLIFE連携機能があれば追加投資はほぼ不要。" },
+    staffing_lead_time:"", notes:"人員要件なし。既存ソフトのLIFE連携機能があれば追加投資はほぼ不要。" },
 
   { code:"KOBETSU_KINOU_I", name:"個別機能訓練加算(I)ロ",
     applicable_services:["通所介護"],
     unit_value:56, billing_basis:"per_visit", monthly_frequency:22,
-    requirement_staff:{rehab_staff_count:1}, requirement_process:["個別機能訓練計画書の作成","3ヶ月ごとの評価・見直し","生活機能向上を目的とした訓練の実施記録"],
+    requirement_staff:{rehab_staff_count:1},
+    requirement_process:[
+      {task:"個別機能訓練計画書の作成", owner:"機能訓練指導員", frequency:"利用開始時", deliverable:"個別機能訓練計画書"},
+      {task:"目標達成度の評価・計画の見直し", owner:"機能訓練指導員", frequency:"3ヶ月ごと", deliverable:"評価記録・改定後の計画書"},
+      {task:"生活機能向上を目的とした訓練の実施記録", owner:"機能訓練指導員/介護職員", frequency:"訓練実施の都度", deliverable:"訓練実施記録"},
+    ],
+    variable_cost_items:[{label:"訓練用具・消耗品費", basis:"per_occurrence", yen:15}],
     requires_life_submission:false, hiring_needed_role:"機能訓練指導員(PT/OT/ST等)", hiring_annual_cost:4200000, training_annual_cost:0, system_initial_cost:0,
+    staffing_lead_time:"常勤・非常勤いずれも新規採用が必要。求人掲載から入職まで平均2〜3ヶ月を想定。",
     notes:"専従1名(非常勤可)配置で算定可。常勤専従化で(II)への上位も検討可。" },
 
   { code:"KOUKUEIYOU_SCREEN", name:"口腔・栄養スクリーニング加算(I)",
     applicable_services:["通所介護","通所リハビリテーション"],
     unit_value:20, billing_basis:"per_month", monthly_frequency:1,
-    requirement_staff:{}, requirement_process:["6ヶ月に1回、口腔・栄養状態のスクリーニングを実施し記録","居宅介護支援事業所への情報提供"],
+    requirement_staff:{},
+    requirement_process:[
+      {task:"口腔・栄養状態のスクリーニングを実施し記録", owner:"介護職員(生活相談員と連携)", frequency:"6ヶ月に1回", deliverable:"スクリーニング記録票"},
+      {task:"居宅介護支援事業所への情報提供", owner:"生活相談員", frequency:"スクリーニング実施後速やかに", deliverable:"情報提供書"},
+    ],
+    variable_cost_items:[{label:"スクリーニング実施・記録・情報提供の人件費(全利用者分・月平均30分相当)", basis:"per_month", yen:900}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"人員要件なし。既存職員での実施が可能なため難易度は低い。" },
+    staffing_lead_time:"", notes:"人員要件なし。既存職員での実施が可能なため難易度は低い。" },
 
   { code:"EIYOU_ASSESSMENT", name:"栄養アセスメント加算",
     applicable_services:["通所介護","通所リハビリテーション","特別養護老人ホーム","介護老人保健施設"],
     unit_value:50, billing_basis:"per_month", monthly_frequency:1,
-    requirement_staff:{dietitian_count:1}, requirement_process:["管理栄養士による栄養アセスメントの実施(利用開始時・3ヶ月毎)","多職種連携での栄養ケア計画作成"],
+    requirement_staff:{dietitian_count:1},
+    requirement_process:[
+      {task:"利用開始時の栄養アセスメントの実施", owner:"管理栄養士", frequency:"利用開始時", deliverable:"栄養アセスメント記録"},
+      {task:"アセスメントの再実施", owner:"管理栄養士", frequency:"3ヶ月ごと", deliverable:"再アセスメント記録"},
+      {task:"多職種連携での栄養ケア計画作成", owner:"管理栄養士・看護師・介護職員", frequency:"アセスメント実施の都度", deliverable:"栄養ケア計画書"},
+    ],
+    variable_cost_items:[{label:"栄養アセスメント用品・記録費", basis:"per_occurrence", yen:20}],
     requires_life_submission:false, hiring_needed_role:"管理栄養士", hiring_annual_cost:4500000, training_annual_cost:0, system_initial_cost:0,
+    staffing_lead_time:"常勤採用が難しい場合、外部栄養士との業務委託(巡回型)も選択肢。委託契約なら1〜2ヶ月程度で開始可能。",
     notes:"他事業所との連携(栄養士外部委託・巡回)で常勤雇用を回避できる場合あり。" },
 
   { code:"NINCHISHOU_SENMON_I", name:"認知症専門ケア加算(I)",
     applicable_services:["通所介護","訪問介護","特別養護老人ホーム","介護老人保健施設","グループホーム"],
     unit_value:3, billing_basis:"per_day", monthly_frequency:22,
-    requirement_staff:{trained_dementia_staff:1}, requirement_process:["認知症日常生活自立度III以上の利用者が利用者の半数以上","認知症介護実践リーダー研修修了者の配置","認知症ケアに関する会議を定期開催"],
+    requirement_staff:{trained_dementia_staff:1},
+    requirement_process:[
+      {task:"認知症日常生活自立度III以上の利用者割合の確認", owner:"生活相談員/ケアマネジャー", frequency:"月次", deliverable:"利用者名簿・自立度一覧"},
+      {task:"認知症介護実践リーダー研修修了者の配置", owner:"施設管理者", frequency:"継続的要件", deliverable:"研修修了証の保管"},
+      {task:"認知症ケアに関する会議の開催", owner:"研修修了者が主導、関係職員が参加", frequency:"月1回程度", deliverable:"会議記録"},
+    ],
+    variable_cost_items:[{label:"認知症ケア会議の人件費(月1回・3名×1時間)", basis:"per_month", yen:5400}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:150000, system_initial_cost:0,
+    staffing_lead_time:"研修修了者が未配置の場合、外部研修(認知症介護実践リーダー研修)の受講に数ヶ月〜半年を要する。",
     notes:"対象者割合(認知症III以上が全体の1/2以上)を満たすかが最大の分岐点。" },
 
   { code:"SEISAN_TEISEI_KYOKA", name:"サービス提供体制強化加算(I)",
     applicable_services:["通所介護","訪問介護","訪問看護","特別養護老人ホーム","介護老人保健施設"],
     unit_value:22, billing_basis:"per_visit", monthly_frequency:22,
-    requirement_staff:{}, requirement_process:["介護福祉士の割合が利用者に対し一定割合以上(サービス種別ごとに規定)","職員研修計画の策定・実施","会議の定期開催"],
+    requirement_staff:{},
+    requirement_process:[
+      {task:"介護福祉士等の配置割合の算出・維持", owner:"施設管理者", frequency:"月次確認", deliverable:"職員配置状況の記録"},
+      {task:"職員研修計画の策定・実施", owner:"施設管理者/研修担当者", frequency:"年間計画の策定+実施の都度", deliverable:"研修計画書・実施記録"},
+      {task:"会議の定期開催", owner:"施設管理者", frequency:"月1回程度", deliverable:"会議記録"},
+    ],
+    variable_cost_items:[{label:"研修計画運営・会議の人件費(月2時間相当)", basis:"per_month", yen:3600}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"有資格者比率が既に高い事業所は追加投資ゼロで即算定可能な典型例。" },
+    staffing_lead_time:"", notes:"有資格者比率が既に高い事業所は追加投資ゼロで即算定可能な典型例。" },
 
   { code:"SEIKATSU_KINOU_RENKEI", name:"生活機能向上連携加算(I)",
     applicable_services:["通所介護","訪問介護"],
     unit_value:100, billing_basis:"per_month", monthly_frequency:1,
-    requirement_staff:{}, requirement_process:["外部のリハ専門職(訪問リハ事業所等)と連携しアセスメント","個別サービス計画への反映"],
+    requirement_staff:{},
+    requirement_process:[
+      {task:"外部リハ専門職(訪問リハ・医療機関等)との連携先の確保", owner:"施設管理者/生活相談員", frequency:"契約時に一度、以降継続", deliverable:"連携に関する契約書・同意書"},
+      {task:"外部専門職によるアセスメントへの同行・情報共有", owner:"生活相談員/機能訓練指導員", frequency:"3ヶ月に1回程度", deliverable:"アセスメント結果共有記録"},
+      {task:"個別サービス計画への反映", owner:"サービス提供責任者", frequency:"アセスメント実施後", deliverable:"改定後の個別サービス計画書"},
+    ],
+    variable_cost_items:[{label:"外部リハ専門職との連携調整・アセスメント同行の人件費", basis:"per_occurrence", yen:450}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"自前でPT/OT/ST雇用不要。外部連携のみで算定可能な低コスト加算。" },
+    staffing_lead_time:"", notes:"自前でPT/OT/ST雇用不要。外部連携のみで算定可能な低コスト加算。" },
 
   { code:"NYUYOKU_KAIJO_II", name:"入浴介助加算(II)",
     applicable_services:["通所介護"],
     unit_value:55, billing_basis:"per_visit", monthly_frequency:18,
-    requirement_staff:{rehab_staff_count:0.1}, requirement_process:["利用者の居宅を訪問し浴室環境等をアセスメント","個浴等、居宅の状況に近い環境での入浴介助計画作成"],
+    requirement_staff:{rehab_staff_count:0.1},
+    requirement_process:[
+      {task:"利用者の居宅を訪問し浴室環境等をアセスメント", owner:"機能訓練指導員/介護職員(医師等の助言を得て)", frequency:"利用開始時および3ヶ月に1回程度", deliverable:"居宅訪問アセスメント記録"},
+      {task:"個浴等、居宅の状況に近い環境での入浴介助計画の作成", owner:"介護職員/機能訓練指導員", frequency:"アセスメント実施後", deliverable:"個別入浴介助計画書"},
+      {task:"計画に基づく入浴介助の実施・記録", owner:"介護職員", frequency:"入浴介助の都度", deliverable:"入浴介助実施記録"},
+    ],
+    variable_cost_items:[
+      {label:"個浴対応による追加介助人件費(1回あたり約10分・時給1,800円換算)", basis:"per_occurrence", yen:300},
+      {label:"水道・ガス代(個浴による使用量増加分)", basis:"per_occurrence", yen:60},
+      {label:"洗浄剤・タオル等消耗品費", basis:"per_occurrence", yen:25},
+      {label:"居宅訪問アセスメントの人件費(対象者を3ヶ月サイクルで巡回・月平均15時間相当)", basis:"per_month", yen:30000},
+    ],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"訪問アセスメントの運用構築が主な負荷。0.1名相当の小さな不足は既存職員の再配置で吸収する前提。" },
+    staffing_lead_time:"既存職員のシフト再配置・兼務での対応を想定。0.1名相当の不足であれば運用変更は2〜4週間程度で開始可能。",
+    notes:"訪問アセスメント・個浴対応には人件費・水道代・消耗品費が継続的に発生する。追加雇用は小規模で済む場合が多いが「無償」ではない。" },
 
   { code:"TOKUTEI_JIGYOSHO_I", name:"特定事業所加算(I)",
     applicable_services:["訪問介護"],
     unit_value:190, billing_basis:"per_visit", monthly_frequency:25,
-    requirement_staff:{care_worker_ftv:0}, requirement_process:["訪問介護員等の計画的な研修実施","会議の定期開催(月1回以上)","重度要介護者等対応要件を満たす","サービス提供責任者の要件充足"],
+    requirement_staff:{care_worker_ftv:0},
+    requirement_process:[
+      {task:"訪問介護員等の研修計画の策定・実施", owner:"サービス提供責任者", frequency:"年間計画の策定+実施の都度", deliverable:"研修計画書・実施記録"},
+      {task:"会議の定期開催", owner:"サービス提供責任者", frequency:"月1回以上", deliverable:"会議記録"},
+      {task:"重度要介護者等対応要件の確認", owner:"サービス提供責任者", frequency:"月次確認", deliverable:"対象利用者一覧"},
+      {task:"サービス提供責任者の資格・配置要件の確認", owner:"施設管理者", frequency:"継続的要件", deliverable:"資格証・配置記録"},
+    ],
+    variable_cost_items:[{label:"研修・会議の人件費(月1回・5名×1時間)", basis:"per_month", yen:9000}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"本来は総単位数×20%の加算率型。ここでは1回あたりの想定加算額に単純換算した代表値。" },
+    staffing_lead_time:"", notes:"本来は総単位数×20%の加算率型。ここでは1回あたりの想定加算額に単純換算した代表値。" },
 
   { code:"KANKYU_HOMON_KANGO", name:"緊急時訪問看護加算",
     applicable_services:["訪問看護"],
     unit_value:574, billing_basis:"per_month", monthly_frequency:1,
-    requirement_staff:{nurse_count:1}, requirement_process:["24時間連絡体制の確保","利用者への説明・同意取得"],
+    requirement_staff:{nurse_count:1},
+    requirement_process:[
+      {task:"24時間連絡体制の確保(オンコール体制の構築)", owner:"看護師/管理者", frequency:"継続的要件", deliverable:"連絡体制表・オンコール当番表"},
+      {task:"利用者への説明・同意取得", owner:"看護師", frequency:"利用開始時", deliverable:"同意書"},
+    ],
+    variable_cost_items:[{label:"オンコール待機手当(既存看護師への手当)", basis:"per_month", yen:15000}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"既存看護師でオンコール体制を組める場合は追加人件費なしで算定可。" },
+    staffing_lead_time:"既存看護師でオンコール当番を組める場合は増員不要。持ち回りが困難な体制規模であれば増員を検討。",
+    notes:"既存看護師でオンコール体制を組める場合、新規雇用は不要だが待機手当は発生する。" },
 
   { code:"NICHIJO_KEIZOKU", name:"日常生活継続支援加算",
     applicable_services:["特別養護老人ホーム"],
     unit_value:36, billing_basis:"per_day", monthly_frequency:30,
-    requirement_staff:{care_worker_ftv:0}, requirement_process:["要介護4・5の入所者割合が7割以上","介護福祉士の配置割合要件(6割以上等)を充足"],
+    requirement_staff:{care_worker_ftv:0},
+    requirement_process:[
+      {task:"要介護4・5の入所者割合(7割以上)の確認", owner:"施設管理者/ケアマネジャー", frequency:"月次確認", deliverable:"入所者要介護度一覧"},
+      {task:"介護福祉士の配置割合要件の確認・維持", owner:"施設管理者", frequency:"月次確認", deliverable:"職員配置状況の記録"},
+    ],
+    variable_cost_items:[{label:"重度者ケアに伴う追加人件費(1日あたり)", basis:"per_occurrence", yen:120}],
     requires_life_submission:false, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"重度者割合と介護福祉士比率の2条件。人員要件充足がボトルネックになりやすい。" },
+    staffing_lead_time:"", notes:"重度者割合と介護福祉士比率の2条件。人員要件充足がボトルネックになりやすい。" },
 
   { code:"HAISETSU_SHIEN", name:"排せつ支援加算(I)",
     applicable_services:["特別養護老人ホーム","介護老人保健施設"],
     unit_value:10, billing_basis:"per_month", monthly_frequency:1,
-    requirement_staff:{}, requirement_process:["医師・看護師・介護支援専門員等が排せつ状態を評価","支援計画作成と3ヶ月ごとの見直し","LIFEへの提出"],
+    requirement_staff:{},
+    requirement_process:[
+      {task:"医師・看護師・介護支援専門員等による排せつ状態の評価", owner:"多職種チーム", frequency:"3ヶ月に1回", deliverable:"排せつ評価記録"},
+      {task:"支援計画の作成と見直し", owner:"介護支援専門員", frequency:"評価実施後、3ヶ月ごと", deliverable:"排せつ支援計画書"},
+      {task:"LIFEへのデータ提出", owner:"介護支援専門員/データ入力担当", frequency:"3ヶ月に1回", deliverable:"LIFE提出用データ"},
+    ],
+    variable_cost_items:[{label:"多職種評価・計画作成の人件費(3ヶ月サイクル・月平均相当)", basis:"per_month", yen:3300}],
     requires_life_submission:true, hiring_needed_role:null, hiring_annual_cost:0, training_annual_cost:0, system_initial_cost:0,
-    notes:"多職種評価さえ運用化できれば追加投資は小さい。" },
+    staffing_lead_time:"", notes:"多職種評価さえ運用化できれば追加投資は小さいが、評価・会議の人件費は継続的に発生する。" },
 ];
 
 /* ---------------------------------------------------------------------
- * 1. コアアルゴリズム(kasan_engine.py の1:1移植)
+ * 1. コアアルゴリズム(kasan_engine.py v2 の1:1移植)
  * ------------------------------------------------------------------- */
 function totalUsers(u){ return u.support1+u.support2+u.care1+u.care2+u.care3+u.care4+u.care5; }
 
@@ -390,27 +601,81 @@ function computeRequirementGap(facility, addon){
   return gap;
 }
 
-function estimateAnnualRevenue(facility, addon){
+function computeEligibleUsers(facility, addon){
   const tu = totalUsers(facility.users) || 1;
-  let eligible;
-  if(addon.code === "NINCHISHOU_SENMON_I") eligible = tu * facility.users.dementia_ratio;
-  else if(addon.code === "NICHIJO_KEIZOKU") eligible = facility.users.care4 + facility.users.care5;
-  else eligible = tu;
+  if(addon.code === "NINCHISHOU_SENMON_I") return tu * facility.users.dementia_ratio;
+  if(addon.code === "NICHIJO_KEIZOKU") return facility.users.care4 + facility.users.care5;
+  return tu;
+}
 
+const BILLING_BASIS_LABEL = {
+  per_visit:"利用1回ごとに算定", per_month:"月1回・月額として算定", per_day:"利用1日ごとに算定",
+};
+
+function describeEligibleUsers(facility, addon){
+  const total = totalUsers(facility.users) || 1;
+  if(addon.code === "NINCHISHOU_SENMON_I"){
+    const pct = facility.users.dementia_ratio * 100;
+    const count = total * facility.users.dementia_ratio;
+    return { count, description:`利用者全員(${totalUsers(facility.users)}名) × 認知症自立度III以上の割合(${pct.toFixed(0)}%) = ${count.toFixed(2)}名が対象` };
+  }
+  if(addon.code === "NICHIJO_KEIZOKU"){
+    const count = facility.users.care4 + facility.users.care5;
+    return { count, description:`要介護4(${facility.users.care4}名) + 要介護5(${facility.users.care5}名) = ${count.toFixed(0)}名が対象` };
+  }
+  return { count: total, description:`利用者全員(${totalUsers(facility.users)}名)が対象` };
+}
+
+function estimateAnnualRevenue(facility, addon){
+  const eligible = computeEligibleUsers(facility, addon);
   const monthlyUnits = addon.unit_value * addon.monthly_frequency * eligible;
   const monthlyYen = monthlyUnits * facility.unit_price;
   return Math.round(monthlyYen * 12);
 }
 
+function buildRevenueBreakdown(facility, addon){
+  const eligibleInfo = describeEligibleUsers(facility, addon);
+  const eligible = eligibleInfo.count;
+  const monthlyUnits = addon.unit_value * addon.monthly_frequency * eligible;
+  const monthlyYen = monthlyUnits * facility.unit_price;
+  const annualYen = Math.round(monthlyYen * 12);
+  const formula = `${addon.unit_value}単位 × ${addon.monthly_frequency}回/月 × ${eligible.toFixed(2)}名 × ${facility.unit_price}円/単位 × 12ヶ月 = ${annualYen.toLocaleString("ja-JP")}円`;
+  return {
+    unit_value: addon.unit_value,
+    billing_basis_label: BILLING_BASIS_LABEL[addon.billing_basis] || addon.billing_basis,
+    monthly_frequency: addon.monthly_frequency,
+    eligible_count: eligible,
+    eligible_description: eligibleInfo.description,
+    unit_price: facility.unit_price,
+    region_class: facility.region_class,
+    formula, annual_yen: annualYen,
+  };
+}
+
 function estimateAnnualCost(facility, addon, gap){
-  let runningCost = 0;
+  const breakdown = [];
   const initialCost = addon.system_initial_cost;
+  const eligible = computeEligibleUsers(facility, addon);
+
   if(gap.staffing_gap > 0 && addon.hiring_needed_role){
-    runningCost += addon.hiring_annual_cost * Math.min(gap.staffing_gap, 1.0);
+    const hireCost = addon.hiring_annual_cost * Math.min(gap.staffing_gap, 1.0);
+    breakdown.push({label:`新規雇用人件費(${addon.hiring_needed_role})`, annual_yen:hireCost});
   }
-  runningCost += addon.training_annual_cost;
-  if(gap.system_gap > 0) runningCost += gap.system_gap * 100000;
-  return { initial_cost:initialCost, running_cost_annual:runningCost };
+  if(addon.training_annual_cost){
+    breakdown.push({label:"研修費用", annual_yen:addon.training_annual_cost});
+  }
+  if(gap.system_gap > 0){
+    breakdown.push({label:"システム非対応分の運用工数(LIFE対応)", annual_yen:gap.system_gap * 100000});
+  }
+  for(const item of addon.variable_cost_items){
+    const annualYen = item.basis === "per_month"
+      ? item.yen * 12
+      : item.yen * addon.monthly_frequency * eligible * 12;
+    breakdown.push({label:item.label, annual_yen:Math.round(annualYen)});
+  }
+
+  const runningCostAnnual = breakdown.reduce((s,b)=>s+b.annual_yen, 0);
+  return { initial_cost:initialCost, running_cost_annual:runningCostAnnual, breakdown };
 }
 
 function computeDifficultyScore(gap){
@@ -418,23 +683,49 @@ function computeDifficultyScore(gap){
 }
 
 function generateRoadmap(facility, addon, gap){
-  const steps = [];
-  let n = 1;
+  const phases = [];
+
   if(gap.staffing_gap > 0){
-    steps.push(`${n}. 【人員】${addon.hiring_needed_role || "必要職種"}を常勤換算 ${gap.staffing_gap.toFixed(2)} 名相当、新規雇用または外部連携で確保する。`);
-    n++;
+    const role = addon.hiring_needed_role || "必要職種(既存職員の再配置・兼務を含む)";
+    phases.push({
+      phase:"Phase 1: 人員体制の整備",
+      lead_time: addon.staffing_lead_time || "体制整備に要する期間は個別に確認が必要。",
+      items:[`${role}を常勤換算 ${gap.staffing_gap.toFixed(2)} 名相当、新規雇用・外部委託・既存職員の再配置のいずれかで確保する。`],
+    });
   }
-  for(const p of addon.requirement_process){ steps.push(`${n}. 【運用】${p}`); n++; }
+
+  if(addon.requirement_process.length){
+    phases.push({ phase:"Phase 2: 運用ルールの構築", items: addon.requirement_process, isProcess:true });
+  }
+
   if(addon.requires_life_submission){
     const lifeSupport = CARE_SOFTWARE_LIFE_SUPPORT[facility.care_software] ?? 0.3;
     let sysNote;
     if(lifeSupport >= 0.8) sysNote = `${facility.care_software}はLIFE連携機能を標準搭載しているため、CSVエクスポート機能を有効化し運用フローに組み込むだけで対応可能。`;
     else if(lifeSupport >= 0.5) sysNote = `${facility.care_software}はエクスポート対応済みだが、項目マッピングの手動調整が必要。導入時に代理店へ設定支援を依頼することを推奨。`;
     else sysNote = `${facility.care_software}は現状LIFE連携が弱いため、LIFE専用の入力補助ツール導入または手入力運用の検討が必要。`;
-    steps.push(`${n}. 【システム】${sysNote}`); n++;
+    phases.push({ phase:"Phase 3: システム・記録対応", items:[sysNote] });
   }
-  steps.push(`${n}. 【提出】都道府県・市町村へ加算算定に係る体制等状況一覧表を提出する。`);
-  return steps;
+
+  phases.push({
+    phase:"Phase 4: 届出・算定開始",
+    items:[
+      "体制等状況一覧表(様式は管轄自治体のホームページで公開)に必要事項を記入し、加算根拠となる計画書等の写しを添えて提出する。",
+      "提出先は事業所所在地を管轄する都道府県または市町村の介護保険担当課。",
+      "算定開始日は提出月の翌月1日からとする運用が一般的だが、詳細は自治体の運用に従うこと。",
+    ],
+  });
+
+  phases.push({
+    phase:"Phase 5: 継続運用・見直し(算定後も継続)",
+    items:[
+      "Phase 2で整備した記録を継続的に作成・保管する(指定基準上、原則5年間の保存義務)。",
+      "要件を満たさなくなった場合は速やかに加算の算定を中止し、必要に応じて変更届を提出する。",
+      "報酬改定(3年ごと)・処遇改善加算等の毎年の運用見直しのタイミングで、本マスタの単位数・要件を再確認する。",
+    ],
+  });
+
+  return phases;
 }
 
 function analyze(facility){
@@ -445,16 +736,17 @@ function analyze(facility){
     const gap = computeRequirementGap(facility, addon);
     if(facility.near_miss_addons.has(addon.code)) gap.process_gap = Math.max(0, gap.process_gap - 1);
 
-    const revenue = estimateAnnualRevenue(facility, addon);
+    const revenueBreakdown = buildRevenueBreakdown(facility, addon);
+    const revenue = revenueBreakdown.annual_yen;
     const cost = estimateAnnualCost(facility, addon, gap);
     const amortizedInitial = cost.initial_cost / 5;
     const netProfit = revenue - cost.running_cost_annual - amortizedInitial;
     const difficulty = computeDifficultyScore(gap);
     const roadmap = generateRoadmap(facility, addon, gap);
 
-    results.push({ addon, gap, annual_revenue:revenue, initial_cost:cost.initial_cost,
-      running_cost_annual:cost.running_cost_annual, net_annual_profit:netProfit,
-      difficulty_score:difficulty, roadmap });
+    results.push({ addon, gap, annual_revenue:revenue, revenue_breakdown:revenueBreakdown,
+      initial_cost:cost.initial_cost, running_cost_annual:cost.running_cost_annual, cost_breakdown:cost.breakdown,
+      net_annual_profit:netProfit, difficulty_score:difficulty, roadmap });
   }
   return results;
 }
@@ -499,28 +791,22 @@ function collectFacility(){
   const nearMissAddons = new Set([...document.querySelectorAll(".near-addon:checked")].map(el=>el.value));
   const regionClass = $("region_class").value;
 
-  const facility = {
+  return {
     service_type: $("service_type").value,
     staff: {
-      care_worker_ftv: num("care_worker_ftv"),
-      nurse_count: num("nurse_count"),
-      dietitian_count: num("dietitian_count"),
-      rehab_staff_count: num("rehab_staff_count"),
-      care_manager_count: num("care_manager_count"),
-      trained_dementia_staff: num("trained_dementia_staff"),
+      care_worker_ftv: num("care_worker_ftv"), nurse_count: num("nurse_count"),
+      dietitian_count: num("dietitian_count"), rehab_staff_count: num("rehab_staff_count"),
+      care_manager_count: num("care_manager_count"), trained_dementia_staff: num("trained_dementia_staff"),
     },
     users: {
       support1:num("support1"), support2:num("support2"),
       care1:num("care1"), care2:num("care2"), care3:num("care3"), care4:num("care4"), care5:num("care5"),
       dementia_ratio: num("dementia_ratio")/100, high_medical_need_ratio: num("high_medical_need_ratio")/100,
     },
-    current_addons: currentAddons,
-    near_miss_addons: nearMissAddons,
-    care_software: $("care_software").value,
-    region_class: regionClass,
+    current_addons: currentAddons, near_miss_addons: nearMissAddons,
+    care_software: $("care_software").value, region_class: regionClass,
     unit_price: REGION_UNIT_PRICE[regionClass] ?? 10.00,
   };
-  return facility;
 }
 
 /* ---------------------------------------------------------------------
@@ -536,6 +822,47 @@ function profitSpan(n){
   return `<span class="${cls}">${sign}${Math.round(Math.abs(n)).toLocaleString("ja-JP")}円</span>`;
 }
 
+function renderRevenueBreakdown(r){
+  const b = r.revenue_breakdown;
+  const lines = [
+    ["単位数", `${b.unit_value}単位`],
+    ["算定基準", b.billing_basis_label],
+    ["想定算定回数", `${b.monthly_frequency}回/月`],
+    ["対象利用者数", b.eligible_description],
+    ["地域区分単価", `${b.unit_price}円/単位(${b.region_class})`],
+  ].map(([label, val]) => `<div class="cost-line"><span>${label}</span><span class="amt">${val}</span></div>`).join("");
+  return `${lines}<div class="cost-total" style="flex-direction:column; align-items:flex-start; gap:.3rem;">
+    <span style="font-weight:400; font-size:.78rem; color:var(--ink-soft);">計算式: ${b.formula}</span>
+    <span style="display:flex; justify-content:space-between; width:100%;"><span>年間増収見込み</span><span>${yen(b.annual_yen)}</span></span>
+  </div>`;
+}
+
+function renderCostBreakdown(r){
+  const lines = r.cost_breakdown.map(b => `
+    <div class="cost-line"><span>${b.label}</span><span class="amt">年間 ${yen(b.annual_yen)}</span></div>
+  `).join("") || `<div class="cost-line"><span>追加コストなし(既存の体制・運用で対応可能)</span><span class="amt">0円</span></div>`;
+  const initialLine = r.initial_cost > 0
+    ? `<div class="cost-line"><span>初期コスト(システム導入等)</span><span class="amt">${yen(r.initial_cost)}(5年償却で年間${yen(r.initial_cost/5)})</span></div>`
+    : "";
+  return `${lines}${initialLine}<div class="cost-total"><span>ランニングコスト計(年間)</span><span>${yen(r.running_cost_annual)}</span></div>`;
+}
+
+function renderPhase(phase){
+  let itemsHtml;
+  if(phase.isProcess){
+    itemsHtml = phase.items.map(p => `
+      <div class="process-item">
+        <div class="task">${p.task}</div>
+        <div class="meta"><span><b>担当:</b> ${p.owner}</span><span><b>頻度:</b> ${p.frequency}</span><span><b>作成物:</b> ${p.deliverable}</span></div>
+      </div>
+    `).join("");
+  } else {
+    itemsHtml = phase.items.map(s => `<div class="phase-plain-item">${s}</div>`).join("");
+  }
+  const leadTime = phase.lead_time ? `<div class="phase-leadtime">想定リードタイム: ${phase.lead_time}</div>` : "";
+  return `<div class="phase-block"><p class="phase-name">${phase.phase}</p>${leadTime}${itemsHtml}</div>`;
+}
+
 function renderResults(report){
   const tbodyRoi = document.querySelector("#table-roi tbody");
   tbodyRoi.innerHTML = report.costEffectiveness.map((r,i)=>`
@@ -549,25 +876,29 @@ function renderResults(report){
     </tr>
   `).join("") || `<tr><td colspan="6">対象となる加算候補がありません。</td></tr>`;
 
+  const revenueDetailList = $("revenue-detail-list");
+  revenueDetailList.innerHTML = report.costEffectiveness.length ? report.costEffectiveness.map((r,i) => `
+    <details class="acc-card">
+      <summary><span>${i+1}. ${r.addon.name} &mdash; 年間増収見込み ${yen(r.annual_revenue)}</span><span class="arrow">▶</span></summary>
+      <div class="acc-body">${renderRevenueBreakdown(r)}</div>
+    </details>
+  `).join("") : "";
+
   const costList = $("cost-list");
-  if(report.all.length === 0){
-    costList.innerHTML = `<p class="section-note">対象となる加算候補がありません。業務形態・取得済み加算の設定をご確認ください。</p>`;
-  } else {
-    costList.innerHTML = `<div class="roadmap-list">` + report.all.map(r => `
-      <details class="roadmap-card">
-        <summary><span>${r.addon.name} &mdash; 初期${yen(r.initial_cost)} / 年間${yen(r.running_cost_annual)}</span><span class="arrow">▶</span></summary>
-        <ol>${r.roadmap.map(s=>`<li>${s}</li>`).join("")}</ol>
-      </details>
-    `).join("") + `</div>`;
-  }
+  costList.innerHTML = report.all.length ? report.all.map(r => `
+    <details class="acc-card">
+      <summary><span>${r.addon.name} &mdash; 年間ランニングコスト ${yen(r.running_cost_annual)}</span><span class="arrow">▶</span></summary>
+      <div class="acc-body">${renderCostBreakdown(r)}</div>
+    </details>
+  `).join("") : `<p class="section-note">対象となる加算候補がありません。業務形態・取得済み加算の設定をご確認ください。</p>`;
 
   const roadmapList = $("roadmap-list");
-  roadmapList.innerHTML = report.costEffectiveness.map((r,i) => `
-    <details class="roadmap-card" ${i===0?"open":""}>
+  roadmapList.innerHTML = report.costEffectiveness.length ? report.costEffectiveness.map((r,i) => `
+    <details class="acc-card" ${i===0?"open":""}>
       <summary><span>${i+1}. ${r.addon.name}</span><span class="arrow">▶</span></summary>
-      <ol>${r.roadmap.map(s=>`<li>${s}</li>`).join("")}</ol>
+      <div class="acc-body">${r.roadmap.map(renderPhase).join("")}</div>
     </details>
-  `).join("") || `<p class="section-note">対象となる加算候補がありません。</p>`;
+  `).join("") : `<p class="section-note">対象となる加算候補がありません。</p>`;
 
   const tbodyEase = document.querySelector("#table-ease tbody");
   const easeEmpty = $("ease-empty-note");
@@ -588,6 +919,7 @@ function renderResults(report){
 
   $("empty-state").style.display = "none";
   $("results").classList.add("show");
+  linkifyElement($("results"));
 }
 
 /* ---------------------------------------------------------------------
@@ -597,6 +929,7 @@ fillSelect($("service_type"), SERVICE_TYPES, "通所介護");
 fillSelect($("region_class"), Object.keys(REGION_UNIT_PRICE), "2級地");
 fillSelect($("care_software"), Object.keys(CARE_SOFTWARE_LIFE_SUPPORT), "カイポケ");
 renderAddonChecklist();
+linkifyElement(document.body);
 
 $("service_type").addEventListener("change", renderAddonChecklist);
 
