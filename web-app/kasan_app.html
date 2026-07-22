@@ -101,15 +101,32 @@ th{background:var(--accent-soft); color:var(--accent); font-weight:700; font-siz
 tbody tr:last-child td{border-bottom:none;}
 td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
 .rank-badge{
-  display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem;
-  border-radius:50%; background:var(--gold-soft); color:var(--gold); font-weight:700; font-size:.76rem;
-  font-variant-numeric:tabular-nums;
+  display:inline-flex; align-items:center; justify-content:center; width:1.6rem; height:1.6rem;
+  border-radius:50%; background:var(--gold-soft); color:var(--ink); font-weight:800; font-size:.78rem;
+  font-variant-numeric:tabular-nums; border:1.5px solid var(--gold); flex-shrink:0;
 }
-.pill{display:inline-flex; align-items:center; gap:.3rem; padding:.15rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700; font-variant-numeric:tabular-nums;}
-.pill.ok{background:var(--accent-soft); color:var(--accent);}
-.pill.warn{background:var(--danger-soft); color:var(--danger);}
+.pill{display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .6rem; border-radius:99px; font-size:.72rem; font-weight:700; font-variant-numeric:tabular-nums;}
+.pill.ok{background:var(--accent-soft); color:var(--ink); border:1px solid var(--accent);}
+.pill.warn{background:var(--danger-soft); color:var(--ink); border:1px solid var(--danger);}
 .profit-pos{color:var(--accent); font-weight:700;}
 .profit-neg{color:var(--danger); font-weight:700;}
+
+.equation-strip{
+  display:flex; align-items:center; gap:.7rem; flex-wrap:wrap;
+  padding:.9rem 0 1.1rem; margin-bottom:1rem; border-bottom:1px solid var(--line);
+}
+.eq-item{display:flex; flex-direction:column; gap:.2rem; min-width:112px;}
+.eq-item .eq-label{font-size:.68rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;}
+.eq-item .eq-val{font-size:1.05rem; font-weight:800; font-variant-numeric:tabular-nums; color:var(--ink);}
+.eq-item.eq-result{padding:.5rem .8rem; border-radius:6px; background:var(--input-bg); border:1px solid var(--line);}
+.eq-op{font-size:1.3rem; font-weight:700; color:var(--ink-soft); align-self:center; padding-top:1rem;}
+@media (max-width:520px){ .eq-op{display:none;} .equation-strip{gap:.5rem;} }
+
+.econ-detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 1.4rem;}
+@media (max-width:640px){ .econ-detail-grid{grid-template-columns:1fr;} }
+.econ-col-title{font-size:.72rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.03em; margin:0 0 .5rem;}
+.econ-col + .econ-col{margin-top:1rem;}
+@media (min-width:641px){ .econ-col + .econ-col{margin-top:0;} }
 
 .card-list{display:grid; gap:.7rem; margin-bottom:1.6rem;}
 .acc-card{border:1px solid var(--line); border-radius:6px; background:var(--input-bg);}
@@ -127,15 +144,27 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
 .cost-line .amt{font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--ink-soft);}
 .cost-total{display:flex; justify-content:space-between; padding-top:.5rem; margin-top:.3rem; border-top:1px solid var(--line); font-weight:700; font-size:.86rem;}
 
-.phase-block{margin-bottom:1.1rem;}
+.phase-block{
+  margin-bottom:1rem; padding:.9rem 1rem; border-radius:6px; background:var(--input-bg); border:1px solid var(--line);
+}
 .phase-block:last-child{margin-bottom:0;}
-.phase-name{font-weight:700; font-size:.84rem; color:var(--accent); margin:0 0 .4rem; display:flex; align-items:center; gap:.5rem;}
-.phase-leadtime{font-size:.76rem; color:var(--ink-soft); background:var(--gold-soft); border-left:2px solid var(--gold); padding:.4rem .6rem; margin-bottom:.5rem; border-radius:2px;}
-.phase-plain-item{font-size:.82rem; margin-bottom:.4rem; padding-left:.9rem; border-left:2px solid var(--line);}
-.process-item{border-left:2px solid var(--line); padding-left:.8rem; margin-bottom:.6rem;}
-.process-item .task{font-weight:700; font-size:.84rem;}
-.process-item .meta{display:flex; gap:.9rem; flex-wrap:wrap; font-size:.72rem; color:var(--ink-soft); margin-top:.3rem;}
-.process-item .meta b{color:var(--ink); font-weight:600;}
+.phase-name{
+  font-weight:700; font-size:.82rem; color:var(--ink); margin:0 0 .6rem; display:flex; align-items:center; gap:.55rem;
+}
+.phase-num{
+  display:inline-flex; align-items:center; justify-content:center; width:1.4rem; height:1.4rem; flex-shrink:0;
+  border-radius:50%; background:var(--accent); color:var(--paper); font-size:.72rem; font-weight:800;
+}
+.phase-leadtime{font-size:.76rem; color:var(--ink); background:var(--gold-soft); border-left:2px solid var(--gold); padding:.4rem .6rem; margin-bottom:.6rem; border-radius:2px;}
+.phase-plain-item{font-size:.82rem; margin-bottom:.45rem; padding-left:.9rem; border-left:2px solid var(--line);}
+.phase-plain-item:last-child{margin-bottom:0;}
+.process-item{padding:.6rem .7rem; margin-bottom:.5rem; border-radius:5px; background:var(--panel); border:1px solid var(--line);}
+.process-item:last-child{margin-bottom:0;}
+.process-item .task{font-weight:700; font-size:.84rem; margin-bottom:.45rem;}
+.process-item .meta{display:grid; grid-template-columns:repeat(3, 1fr); gap:.5rem; font-size:.72rem; color:var(--ink-soft);}
+@media (max-width:520px){ .process-item .meta{grid-template-columns:1fr;} }
+.process-item .meta span{display:block;}
+.process-item .meta b{color:var(--ink); font-weight:700; display:block; font-size:.66rem; text-transform:uppercase; letter-spacing:.03em; margin-bottom:.1rem;}
 
 .result-block{margin-bottom:2.4rem;}
 .result-block:last-child{margin-bottom:0;}
@@ -251,15 +280,13 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
           <div class="results" id="results">
             <div class="result-block">
               <div class="section-title"><span class="mark">①</span><h2>費用対効果ランキング(上位5件)</h2></div>
-              <p class="section-note">年間純利益(想定収益&minus;想定追加コスト)が高い順。既存職員の稼働時間・水道代・消耗品費もコストに含めて算出しています。</p>
-              <div class="table-scroll"><table id="table-roi"><thead><tr><th></th><th>加算名</th><th class="num">年間増収見込み</th><th class="num">年間追加コスト</th><th class="num">年間純利益</th><th>判定</th></tr></thead><tbody></tbody></table></div>
-              <p class="small-note" style="margin-top:.9rem;">加算ごとの「年間増収見込み」の算出根拠(単位数・算定回数・対象利用者数・地域区分単価)は下の各カードを開くと確認できます。</p>
-              <div id="revenue-detail-list" class="card-list" style="margin-top:.6rem;"></div>
+              <p class="section-note">年間純利益 = 年間収益 &minus; 年間コスト、という差額をカードごとに示しています。既存職員の稼働時間・水道代・消耗品費もコストに含めて算出しています。行を開くと収益・コストそれぞれの内訳も確認できます。</p>
+              <div id="roi-list" class="card-list"></div>
             </div>
 
             <div class="result-block">
-              <div class="section-title"><span class="mark">②</span><h2>コスト見積もり(内訳付き・候補全件)</h2></div>
-              <p class="section-note">行を開くと、人件費・研修費・水道代・消耗品費などの費目別内訳が確認できます。</p>
+              <div class="section-title"><span class="mark">②</span><h2>収益・コストの内訳(候補全件)</h2></div>
+              <p class="section-note">①でランク外の候補も含め、同じ形式(収益 &minus; コスト = 純利益)で全候補を確認できます。</p>
               <div id="cost-list" class="card-list"></div>
             </div>
 
@@ -822,7 +849,7 @@ function profitSpan(n){
   return `<span class="${cls}">${sign}${Math.round(Math.abs(n)).toLocaleString("ja-JP")}円</span>`;
 }
 
-function renderRevenueBreakdown(r){
+function renderRevenueLines(r){
   const b = r.revenue_breakdown;
   const lines = [
     ["単位数", `${b.unit_value}単位`],
@@ -831,64 +858,90 @@ function renderRevenueBreakdown(r){
     ["対象利用者数", b.eligible_description],
     ["地域区分単価", `${b.unit_price}円/単位(${b.region_class})`],
   ].map(([label, val]) => `<div class="cost-line"><span>${label}</span><span class="amt">${val}</span></div>`).join("");
-  return `${lines}<div class="cost-total" style="flex-direction:column; align-items:flex-start; gap:.3rem;">
-    <span style="font-weight:400; font-size:.78rem; color:var(--ink-soft);">計算式: ${b.formula}</span>
-    <span style="display:flex; justify-content:space-between; width:100%;"><span>年間増収見込み</span><span>${yen(b.annual_yen)}</span></span>
-  </div>`;
+  return `${lines}<div class="cost-line"><span style="color:var(--ink-soft); font-size:.78rem;">計算式: ${b.formula}</span></div>`;
 }
 
-function renderCostBreakdown(r){
+function renderCostLines(r){
   const lines = r.cost_breakdown.map(b => `
     <div class="cost-line"><span>${b.label}</span><span class="amt">年間 ${yen(b.annual_yen)}</span></div>
   `).join("") || `<div class="cost-line"><span>追加コストなし(既存の体制・運用で対応可能)</span><span class="amt">0円</span></div>`;
   const initialLine = r.initial_cost > 0
     ? `<div class="cost-line"><span>初期コスト(システム導入等)</span><span class="amt">${yen(r.initial_cost)}(5年償却で年間${yen(r.initial_cost/5)})</span></div>`
     : "";
-  return `${lines}${initialLine}<div class="cost-total"><span>ランニングコスト計(年間)</span><span>${yen(r.running_cost_annual)}</span></div>`;
+  return `${lines}${initialLine}`;
+}
+
+function renderEconomicsCard(r){
+  const totalCost = r.running_cost_annual + r.initial_cost/5;
+  return `
+    <div class="equation-strip">
+      <div class="eq-item"><span class="eq-label">年間収益</span><span class="eq-val">${yen(r.annual_revenue)}</span></div>
+      <div class="eq-op">&minus;</div>
+      <div class="eq-item"><span class="eq-label">年間コスト</span><span class="eq-val">${yen(totalCost)}</span></div>
+      <div class="eq-op">=</div>
+      <div class="eq-item eq-result"><span class="eq-label">年間純利益</span><span class="eq-val">${profitSpan(r.net_annual_profit)}</span></div>
+    </div>
+    <div class="econ-detail-grid">
+      <div class="econ-col"><p class="econ-col-title">収益の内訳</p>${renderRevenueLines(r)}</div>
+      <div class="econ-col"><p class="econ-col-title">コストの内訳</p>${renderCostLines(r)}</div>
+    </div>
+  `;
 }
 
 function renderPhase(phase){
+  const m = phase.phase.match(/Phase\s*(\d+)\s*:\s*(.+)/);
+  const num = m ? m[1] : "";
+  const title = m ? m[2] : phase.phase;
   let itemsHtml;
   if(phase.isProcess){
     itemsHtml = phase.items.map(p => `
       <div class="process-item">
         <div class="task">${p.task}</div>
-        <div class="meta"><span><b>担当:</b> ${p.owner}</span><span><b>頻度:</b> ${p.frequency}</span><span><b>作成物:</b> ${p.deliverable}</span></div>
+        <div class="meta">
+          <span><b>担当</b>${p.owner}</span>
+          <span><b>頻度</b>${p.frequency}</span>
+          <span><b>作成物</b>${p.deliverable}</span>
+        </div>
       </div>
     `).join("");
   } else {
     itemsHtml = phase.items.map(s => `<div class="phase-plain-item">${s}</div>`).join("");
   }
   const leadTime = phase.lead_time ? `<div class="phase-leadtime">想定リードタイム: ${phase.lead_time}</div>` : "";
-  return `<div class="phase-block"><p class="phase-name">${phase.phase}</p>${leadTime}${itemsHtml}</div>`;
+  const heading = num ? `<span class="phase-num">${num}</span>${title}` : title;
+  return `<div class="phase-block"><p class="phase-name">${heading}</p>${leadTime}${itemsHtml}</div>`;
 }
 
 function renderResults(report){
-  const tbodyRoi = document.querySelector("#table-roi tbody");
-  tbodyRoi.innerHTML = report.costEffectiveness.map((r,i)=>`
-    <tr>
-      <td><span class="rank-badge">${i+1}</span></td>
-      <td>${r.addon.name}</td>
-      <td class="num">${yen(r.annual_revenue)}</td>
-      <td class="num">${yen(r.running_cost_annual + r.initial_cost/5)}</td>
-      <td class="num">${profitSpan(r.net_annual_profit)}</td>
-      <td>${r.net_annual_profit < 0 ? '<span class="pill warn">赤字注意</span>' : '<span class="pill ok">黒字</span>'}</td>
-    </tr>
-  `).join("") || `<tr><td colspan="6">対象となる加算候補がありません。</td></tr>`;
-
-  const revenueDetailList = $("revenue-detail-list");
-  revenueDetailList.innerHTML = report.costEffectiveness.length ? report.costEffectiveness.map((r,i) => `
-    <details class="acc-card">
-      <summary><span>${i+1}. ${r.addon.name} &mdash; 年間増収見込み ${yen(r.annual_revenue)}</span><span class="arrow">▶</span></summary>
-      <div class="acc-body">${renderRevenueBreakdown(r)}</div>
+  const roiList = $("roi-list");
+  roiList.innerHTML = report.costEffectiveness.length ? report.costEffectiveness.map((r,i) => `
+    <details class="acc-card" ${i===0?"open":""}>
+      <summary>
+        <span style="display:flex; align-items:center; gap:.7rem; min-width:0;">
+          <span class="rank-badge">${i+1}</span>
+          <span>${r.addon.name}</span>
+        </span>
+        <span style="display:flex; align-items:center; gap:.6rem; flex-shrink:0;">
+          ${profitSpan(r.net_annual_profit)}
+          ${r.net_annual_profit < 0 ? '<span class="pill warn">赤字注意</span>' : '<span class="pill ok">黒字</span>'}
+          <span class="arrow">▶</span>
+        </span>
+      </summary>
+      <div class="acc-body">${renderEconomicsCard(r)}</div>
     </details>
-  `).join("") : "";
+  `).join("") : `<p class="section-note">対象となる加算候補がありません。</p>`;
 
   const costList = $("cost-list");
   costList.innerHTML = report.all.length ? report.all.map(r => `
     <details class="acc-card">
-      <summary><span>${r.addon.name} &mdash; 年間ランニングコスト ${yen(r.running_cost_annual)}</span><span class="arrow">▶</span></summary>
-      <div class="acc-body">${renderCostBreakdown(r)}</div>
+      <summary>
+        <span style="min-width:0;">${r.addon.name}</span>
+        <span style="display:flex; align-items:center; gap:.6rem; flex-shrink:0;">
+          ${profitSpan(r.net_annual_profit)}
+          <span class="arrow">▶</span>
+        </span>
+      </summary>
+      <div class="acc-body">${renderEconomicsCard(r)}</div>
     </details>
   `).join("") : `<p class="section-note">対象となる加算候補がありません。業務形態・取得済み加算の設定をご確認ください。</p>`;
 
