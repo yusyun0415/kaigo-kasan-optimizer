@@ -85,6 +85,7 @@ button.primary{background:var(--accent); color:var(--paper);}
 button.primary:hover{filter:brightness(1.08);}
 button.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
 button.ghost:hover{border-color:var(--accent); color:var(--accent);}
+#toggle-all-roi{width:100%; font-size:.82rem; padding:.6rem 1rem;}
 
 .empty-state{display:flex; align-items:center; justify-content:center; min-height:380px; color:var(--ink-soft); font-size:.92rem; text-align:center; padding:2rem;}
 .results{display:none;}
@@ -283,6 +284,8 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
               <div class="section-title"><span class="mark">①</span><h2>費用対効果ランキング(上位5件)</h2></div>
               <p class="section-note">年間純利益 = 年間収益 &minus; 年間コスト、という差額をカードごとに示しています。既存職員の稼働時間・水道代・消耗品費もコストに含めて算出しています。行を開くと収益・コストそれぞれの内訳も確認できます。</p>
               <div id="roi-list" class="card-list"></div>
+              <button type="button" class="ghost" id="toggle-all-roi">他の加算の費用対効果も見る</button>
+              <div id="roi-list-more" class="card-list" style="display:none; margin-top:.7rem;"></div>
             </div>
 
             <div class="result-block">
@@ -1329,6 +1332,27 @@ function renderResults(report){
     </details>
   `).join("") : `<p class="section-note">対象となる加算候補がありません。</p>`;
 
+  const topCodes = new Set(report.costEffectiveness.map(r => r.addon.code));
+  const others = report.all.filter(r => !topCodes.has(r.addon.code));
+  const roiListMore = $("roi-list-more");
+  const toggleBtn = $("toggle-all-roi");
+  roiListMore.innerHTML = others.map(r => `
+    <details class="acc-card">
+      <summary>
+        <span style="min-width:0;">${r.addon.name}</span>
+        <span style="display:flex; align-items:center; gap:.6rem; flex-shrink:0;">
+          ${profitSpan(r.net_annual_profit)}
+          ${r.net_annual_profit < 0 ? '<span class="pill warn">赤字注意</span>' : '<span class="pill ok">黒字</span>'}
+          <span class="arrow">▶</span>
+        </span>
+      </summary>
+      <div class="acc-body">${renderEconomicsCard(r)}</div>
+    </details>
+  `).join("");
+  roiListMore.style.display = "none";
+  toggleBtn.textContent = "他の加算の費用対効果も見る";
+  toggleBtn.style.display = others.length ? "" : "none";
+
   const roadmapList = $("roadmap-list");
   roadmapList.innerHTML = report.costEffectiveness.length ? report.costEffectiveness.map((r,i) => `
     <details class="acc-card" ${i===0?"open":""}>
@@ -1381,6 +1405,13 @@ renderAddonChecklist();
 linkifyElement(document.body);
 
 $("service_type").addEventListener("change", renderAddonChecklist);
+
+$("toggle-all-roi").addEventListener("click", function(){
+  const moreList = $("roi-list-more");
+  const isHidden = moreList.style.display === "none";
+  moreList.style.display = isHidden ? "" : "none";
+  this.textContent = isHidden ? "閉じる" : "他の加算の費用対効果も見る";
+});
 
 $("facility-form").addEventListener("submit", function(e){
   e.preventDefault();
