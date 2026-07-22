@@ -263,7 +263,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
           <div class="panel">
             <fieldset>
               <legend>D. 現在の加算取得状況</legend>
-              <p class="hint" style="margin-bottom:.8rem;">選択中のサービス類型に該当する主要な加算のみ表示しています(入力の手間を減らすため)。「取得済み」は提案対象から除外、「ほぼ達成」は難易度計算で考慮されます。①〜④の分析結果は、ここに表示されない加算も含めた全収録加算を対象に算出します。</p>
+              <p class="hint" style="margin-bottom:.8rem;">選択中のサービス類型に該当する主要な加算のみ表示しています(入力の手間を減らすため)。「取得済み」は提案対象から除外、「ほぼ達成」は難易度計算で考慮されます。①〜③の分析結果は、ここに表示されない加算も含めた全収録加算を対象に算出します。</p>
               <div id="addon-checklist" class="addon-check-list"></div>
             </fieldset>
           </div>
@@ -277,7 +277,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
 
       <div>
         <div class="panel" id="results-panel">
-          <div class="empty-state" id="empty-state">左のフォームに施設情報を入力し「分析する」を押すと、<br>ここに①〜④の分析結果が表示されます。</div>
+          <div class="empty-state" id="empty-state">左のフォームに施設情報を入力し「分析する」を押すと、<br>ここに①〜③の分析結果が表示されます。</div>
           <div class="results" id="results">
             <div class="result-block">
               <div class="section-title"><span class="mark">①</span><h2>費用対効果ランキング(上位5件)</h2></div>
@@ -286,22 +286,16 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
             </div>
 
             <div class="result-block">
-              <div class="section-title"><span class="mark">②</span><h2>収益・コストの内訳(候補全件)</h2></div>
-              <p class="section-note">①でランク外の候補も含め、同じ形式(収益 &minus; コスト = 純利益)で全候補を確認できます。</p>
-              <div id="cost-list" class="card-list"></div>
-            </div>
-
-            <div class="result-block">
-              <div class="section-title"><span class="mark">③</span><h2>獲得ロードマップ(①上位5件)</h2></div>
+              <div class="section-title"><span class="mark">②</span><h2>獲得ロードマップ(①上位5件)</h2></div>
               <p class="section-note">Phase 1(人員体制)→Phase 2(運用ルール・担当者/頻度/作成物)→Phase 3(システム対応)→Phase 4(届出)→Phase 5(継続運用)の順で構成しています。</p>
               <div class="card-list" id="roadmap-list"></div>
             </div>
 
             <div class="result-block">
-              <div class="section-title"><span class="mark">④</span><h2>難易度が低い加算ランキング</h2></div>
+              <div class="section-title"><span class="mark">③</span><h2>難易度が低い加算ランキング</h2></div>
               <p class="section-note">人員の新規採用がほぼ不要な候補に限定し、難易度スコア(低いほど容易)昇順で表示します。「取りやすい」が「儲かる」を意味しない点にも注意してください。行を開くと、なぜ難易度が低いのか(人員・システム・運用の各ギャップ)と獲得ロードマップを確認できます。</p>
               <div class="card-list" id="ease-list"></div>
-              <p class="small-note" id="ease-empty-note" style="display:none;">人員ギャップがゼロの候補が現在ありません。まずは①③で人員確保の要否をご確認ください。</p>
+              <p class="small-note" id="ease-empty-note" style="display:none;">人員ギャップがゼロの候補が現在ありません。まずは①②で人員確保の要否をご確認ください。</p>
             </div>
           </div>
         </div>
@@ -1334,20 +1328,6 @@ function renderResults(report){
       <div class="acc-body">${renderEconomicsCard(r)}</div>
     </details>
   `).join("") : `<p class="section-note">対象となる加算候補がありません。</p>`;
-
-  const costList = $("cost-list");
-  costList.innerHTML = report.all.length ? report.all.map(r => `
-    <details class="acc-card">
-      <summary>
-        <span style="min-width:0;">${r.addon.name}</span>
-        <span style="display:flex; align-items:center; gap:.6rem; flex-shrink:0;">
-          ${profitSpan(r.net_annual_profit)}
-          <span class="arrow">▶</span>
-        </span>
-      </summary>
-      <div class="acc-body">${renderEconomicsCard(r)}</div>
-    </details>
-  `).join("") : `<p class="section-note">対象となる加算候補がありません。業務形態・取得済み加算の設定をご確認ください。</p>`;
 
   const roadmapList = $("roadmap-list");
   roadmapList.innerHTML = report.costEffectiveness.length ? report.costEffectiveness.map((r,i) => `
